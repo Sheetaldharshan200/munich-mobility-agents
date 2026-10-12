@@ -15,6 +15,7 @@ Public Munich mobility data in Exasol Personal on a laptop. Four persona agents 
 | [skill/persona-metrics/](skill/persona-metrics/SKILL.md) | Dashboard pipeline (vendored from [yuvi-ex/dashserverskills](https://github.com/yuvi-ex/dashserverskills), chat panel and API key removed) |
 | [scripts/prepare_dataset.py](scripts/prepare_dataset.py) | Portal download → flat, clean, district-tagged CSVs |
 | [Release: munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) | The load-ready data (18 MB) |
+| [docs/data-verification.md](docs/data-verification.md) | Source vs. loaded row counts, every table |
 | [docs/talk-track.md](docs/talk-track.md) | Talk concept and 35-minute flow |
 
 ## Data

@@ -26,6 +26,9 @@ Output files (-> table names after load, schema MUNICH_DATASET):
   mvv_stop_times.csv           MVV_STOP_TIMES          GTFS (large: ~250 MB)
   mvv_calendar.csv             MVV_CALENDAR            GTFS
   mvv_calendar_dates.csv       MVV_CALENDAR_DATES      GTFS
+  mvv_feed_info.csv            MVV_FEED_INFO           GTFS
+  mvv_ticketing_deep_links.csv MVV_TICKETING_DEEP_LINKS GTFS
+  mvv_ticketing_identifiers.csv MVV_TICKETING_IDENTIFIERS GTFS (when present)
   mvg_bike_trips.csv           MVG_BIKE_TRIPS          optional, --with-mvg-bikes 2024 2025
 """
 from __future__ import annotations
@@ -424,6 +427,18 @@ def main() -> int:
         r["in_munich"] = "1" if r["district_no"] else "0"
         stops.append(r)
     write_csv(out / "mvv_stops.csv", list(stops[0].keys()), stops)
+
+    # every other GTFS file, unchanged, so nothing in the feed is left behind
+    for name in ("feed_info", "ticketing_deep_links", "ticketing_identifiers", "shapes"):
+        f = d_mvv / f"{name}.csv"
+        if not f.exists():
+            print(f"  skip: {f.name} not in the archive")
+            continue
+        rows = list(read_csv(f, delimiter=","))
+        if not rows:
+            print(f"  skip: {f.name} has a header but no rows (exapump cannot load an empty file)")
+            continue
+        write_csv(out / f"mvv_{name}.csv", list(rows[0].keys()), rows)
 
     if not args.skip_stop_times:
         src_st = d_mvv / "stop_times.csv"
