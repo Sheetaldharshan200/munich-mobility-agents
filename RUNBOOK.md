@@ -11,18 +11,8 @@ Windows PowerShell
 ```powershell
 irm https://www.exasol.com/install/starter-kit.ps1 | iex
 ```
-Two installer questions matter for this demo. Use Space to select, Enter to confirm.
-
 - **MCP server, AI clients:** when asked which AI clients to connect to the Exasol MCP server, select **Claude**. It covers both the Claude desktop app and Claude Code.
 - **Marketplace, optional add-ons:** when the marketplace selection opens, select **dash-server**. It hosts the dashboards.
-
-Missed either one? Install dash-server first, then connect Claude, so both MCP servers are registered:
-```bash
-EXAKIT_MARKETPLACE_ADDONS=dash-server exakit marketplace
-```
-```bash
-EXAKIT_MCP_CLIENTS=claude exakit mcp-setup
-```
 
 ### 2. Install the Munich demo agents
 Four persona agents for the talk (Mobility Operations, Urban Planning, Sustainability, City Leadership), the skill that sends every dashboard request to Dash Server instead of a chat artifact (and installs dash-server from the marketplace if it is missing), and the dashboard builder. Applies to Claude Code and to Codex, Cursor, Gemini CLI, OpenCode and Continue when they are on the machine.
