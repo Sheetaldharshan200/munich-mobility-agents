@@ -26,7 +26,7 @@ irm https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/
 ```
 
 ### 3. Get the data
-Download [munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) (18 MB) and unzip it. Copy the path of the `munich-dataset` folder.
+Download [munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) (18 MB) and unzip it. Note the full path of the `munich-dataset` folder, for example `/Users/<your-name>/Downloads/munich-dataset`.
 
 ### 4. Load the data
 ```bash
@@ -39,12 +39,17 @@ Prompt 1 — Space to tick, Enter:
 ? What would you like to load?
   [✓] A local CSV / Parquet / JSON file, or a folder of them
 ```
-Prompt 2 — paste the folder path, Enter:
+Prompt 2 — paste the **full** path of the unzipped folder, Enter (`~` does not work here; drag the folder into the terminal to get the full path):
 ```
 ? Local CSV / Parquet / JSON file — or a folder of them (type back to return)
 ```
+macOS / Linux example
 ```
-~/Downloads/munich-dataset
+/Users/<your-name>/Downloads/munich-dataset
+```
+Windows example
+```
+C:\Users\<your-name>\Downloads\munich-dataset
 ```
 Prompt 3 — paste the schema name, Enter:
 ```
