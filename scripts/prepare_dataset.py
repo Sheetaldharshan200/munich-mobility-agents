@@ -168,8 +168,9 @@ class DistrictIndex:
 
 
 # --------------------------------------------------------------------------- helpers
-def norm_date(s: str) -> str:
-    """'2026.01.01' / '01.01.2026' / '2026-01-01' / with time -> 'YYYY-MM-DD'."""
+def norm_date(s: str, strict: bool = False) -> str:
+    """'2026.01.01' / '01.01.2026' / '2026-01-01' / with time -> 'YYYY-MM-DD'.
+    strict=True returns '' for anything that is not a date (e.g. 'Beginn vor mehr als einem Jahr')."""
     s = (s or "").strip()
     m = re.match(r"^(\d{4})[.\-/](\d{2})[.\-/](\d{2})", s)
     if m:
@@ -177,7 +178,7 @@ def norm_date(s: str) -> str:
     m = re.match(r"^(\d{2})[.\-/](\d{2})[.\-/](\d{4})", s)
     if m:
         return f"{m.group(3)}-{m.group(2)}-{m.group(1)}"
-    return s
+    return "" if strict else s
 
 
 def norm_datetime(s: str) -> str:
@@ -192,6 +193,11 @@ def norm_datetime(s: str) -> str:
 def num(s: str) -> str:
     s = (s or "").strip().replace(",", ".")
     return s
+
+
+def intnum(s: str) -> str:
+    """'101 901' / '101.901' -> '101901'."""
+    return re.sub(r"[^0-9-]", "", s or "")
 
 
 def clean_header(h: str) -> str:
@@ -306,9 +312,9 @@ def main() -> int:
         p = pop.get(no, {})
         districts.append({
             "district_no": no, "district_name": entry["name"],
-            "population": p.get("bevoelkerung", ""), "population_pct": num(p.get("bevoelkerung_in_prozent", "")),
+            "population": intnum(p.get("bevoelkerung", "")), "population_pct": num(p.get("bevoelkerung_in_prozent", "")),
             "area_ha": num(p.get("flaeche_in_ha", "")), "area_pct": num(p.get("flaeche_in_prozent", "")),
-            "density_per_ha": p.get("einwohnerdichte", ""), "area_sqm": round(entry["area_sqm"], 2),
+            "density_per_ha": intnum(p.get("einwohnerdichte", "")), "area_sqm": round(entry["area_sqm"], 2),
             "centroid_lat": clat, "centroid_lon": clon, "polygon_wkt": polygon_wkt_wgs84(entry["rings"]),
         })
     districts.sort(key=lambda d: int(d["district_no"]))
@@ -355,8 +361,8 @@ def main() -> int:
             "affected_areas": r.get("betroffene_bereiche", ""), "description": r.get("beschreibung", ""),
             "impact": r.get("beeintraechtigung", ""), "kind": r.get("art", ""),
             "more_info": r.get("weitere_info", ""), "contact": r.get("kontakt_oeffentlich", ""),
-            "start_date": norm_date(r.get("beginn_datum_kombiniert", "")),
-            "end_date": norm_date(r.get("ende_datum_kombiniert", "")),
+            "start_date": norm_date(r.get("beginn_datum_kombiniert", ""), strict=True),
+            "end_date": norm_date(r.get("ende_datum_kombiniert", ""), strict=True),
             "start_raw": r.get("beginn_datum_kombiniert", ""), "end_raw": r.get("ende_datum_kombiniert", ""),
             "source_id": r.get("fachliche_id", ""), "centroid_lat": clat, "centroid_lon": clon,
             "district_no": idx.lookup(clat, clon) if clat != "" else "",

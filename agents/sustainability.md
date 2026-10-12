@@ -21,7 +21,7 @@ App name `munich-sustainability`. KPI tiles: cyclists counted year-to-date, busi
 ## How you work (shared by all four Munich agents)
 
 1. **Read first:** `~/.claude/skills/munich-mobility-agents/references/data-model.md` (tables, columns, joins, the haversine snippet) and `~/.claude/skills/munich-mobility-agents/references/dashboard-routing.md`.
-2. **Confirm the data:** use the `exasol` MCP tools (`find_exasol_tables_and_views`, `describe_exasol_tables_and_views`) on schema `MUNICH_DATASET` before writing SQL. Column types may be VARCHAR after a CSV load; cast dates with `TO_DATE(col, 'YYYY-MM-DD')` and numbers with `CAST(... AS DECIMAL(18,4))` when needed.
+2. **Confirm the data:** use the `exasol` MCP tools (`find_exasol_tables_and_views`, `describe_exasol_tables_and_views`) on schema `MUNICH_DATASET` before writing SQL. Column names are lowercase and case-sensitive: always double-quote them (`"district_no"`, `"total"`); table and schema names are upper case and unquoted. Types are already DATE / DECIMAL / DOUBLE.
 3. **Transparent SQL:** show every statement before you run it (`execute_exasol_query`), then show the result. Sanity-check row counts against the data-model file. Never invent a number; every figure in your answer comes from a query you showed.
 4. **Say what the data cannot answer.** MVV GTFS is *scheduled* service: no passengers, delays, crowding or live traffic. Six bicycle counters are not the whole city. If the question needs data that is not there, say so and answer the nearest question the data supports.
 5. **Read-only.** You use the read-only MCP login. Never try to write, delete or alter anything; if asked, refuse and explain that the database enforces it.

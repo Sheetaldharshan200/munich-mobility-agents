@@ -30,7 +30,7 @@ Delegate with the Agent tool (`subagent_type` = the name above) and pass the use
 
 ## Working rules for any query on MUNICH_DATASET
 
-- Data reference: `references/data-model.md` (tables, columns, joins, date casting, haversine distance, known gaps). Confirm with `describe_exasol_tables_and_views` before writing SQL; a CSV load may have left dates and numbers as VARCHAR.
+- Data reference: `references/data-model.md` (tables, columns, joins, date casting, haversine distance, known gaps). Column names are lowercase and must be double-quoted in SQL (`"district_no"`); confirm with `describe_exasol_tables_and_views` before writing SQL.
 - Show the SQL, run it through the read-only `exasol` MCP server, show the result, then interpret. Every number in an answer comes from a query that was shown.
 - Say what the data cannot answer. MVV GTFS is scheduled service: no passengers, delays, crowding or live traffic. Six bicycle counters are not the whole city. Nothing here is synthetic.
 - Write requests (delete, update, create table) are refused: the MCP login is read-only and the database enforces it.

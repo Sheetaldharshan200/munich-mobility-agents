@@ -2,6 +2,10 @@
 
 Schema `MUNICH_DATASET`, loaded by `EXAKIT_SCHEMA=MUNICH_DATASET exakit data-load ~/munich-open-data` from the flat folder that `prepare_dataset.py` writes. One table per file, table name = file name upper-cased. Column names below are the CSV headers; confirm their types with `describe_exasol_tables_and_views` because a CSV load may leave dates and decimals as VARCHAR.
 
+**Column names are lowercase and case-sensitive.** exapump creates them exactly as in the CSV header, so every column must be double-quoted in SQL: `SELECT "district_no", "population" FROM MUNICH_DATASET.DISTRICTS`. Unquoted `district_no` fails with "object DISTRICT_NO not found". Table and schema names are upper case and need no quotes.
+
+**Types as loaded (verified):** dates are `DATE` (`count_date`, `start_date`, `end_date`, calendar dates), counts are `DECIMAL(36,0)`, measurements are `DOUBLE`, text is `VARCHAR`. GTFS `arrival_time` / `departure_time` are text `HH:MM:SS` (can exceed 24:00). Roadworks with a non-date start in the source (e.g. "Beginn vor mehr als einem Jahr") have `start_date` NULL and the original text in `start_raw`.
+
 All coordinates are **WGS84** (`lat`, `lon` in degrees). Every point table carries `district_no` (1–25) computed by point-in-polygon against the district boundaries, so district joins are plain equality joins. Polygons are WKT in WGS84 with `lon lat` order.
 
 ## Tables
@@ -69,23 +73,26 @@ trip_no, start_time, end_time, start_lat/lon, end_lat/lon, rental_is_station, re
 
 ## Joins
 - District rollups: `X.district_no = DISTRICTS.district_no` for stops, roadworks, cycle segments, counters.
-- Departures per stop: `MVV_STOP_TIMES st JOIN MVV_TRIPS t ON st.trip_id = t.trip_id JOIN MVV_ROUTES r ON t.route_id = r.route_id JOIN MVV_CALENDAR c ON t.service_id = c.service_id` — filter `c.tuesday = 1` (or any weekday) and a date inside the feed window for a typical weekday.
+- Departures per stop: `MVV_STOP_TIMES st JOIN MVV_TRIPS t ON st."trip_id" = t."trip_id" JOIN MVV_ROUTES r ON t."route_id" = r."route_id" JOIN MVV_CALENDAR c ON t."service_id" = c."service_id"` — filter `c."tuesday" = 1` (or any weekday) and a date inside the feed window for a typical weekday.
 - Proximity: filter both sides to the same `district_no` (or neighbouring ones) first, then apply the distance below. A full cross join of roadworks × stops is 160M pairs; the district filter cuts it to a few million, which Exasol handles in seconds.
 
 ## Haversine distance in metres (Exasol SQL)
 ```sql
 2 * 6371000 * ASIN(SQRT(
-    POWER(SIN(RADIANS(b.lat - a.lat) / 2), 2) +
-    COS(RADIANS(a.lat)) * COS(RADIANS(b.lat)) * POWER(SIN(RADIANS(b.lon - a.lon) / 2), 2)
+    POWER(SIN(RADIANS(b."lat" - a."lat") / 2), 2) +
+    COS(RADIANS(a."lat")) * COS(RADIANS(b."lat")) * POWER(SIN(RADIANS(b."lon" - a."lon") / 2), 2)
 )) AS distance_m
 ```
 Exasol also has GIS functions (`ST_GEOMFROMTEXT`, `ST_POINT`, `ST_CONTAINS`, `ST_DISTANCE`, `ST_INTERSECTS`) on `GEOMETRY` columns; `polygon_wkt` and `shape_wkt` can be wrapped in `ST_GEOMFROMTEXT(...)` for point-in-polygon or intersection questions. Distances from `ST_DISTANCE` on lat/lon are in degrees, so prefer the haversine above for metres.
 
-## Casting when columns arrived as VARCHAR
+## Example
 ```sql
-TO_DATE(count_date, 'YYYY-MM-DD')           -- dates
-CAST(total AS DECIMAL(18,2))                -- numbers
-CAST(rain_mm AS DECIMAL(10,2)) > 1          -- rainy day
+SELECT s."station", d."district_name", AVG(b."total") AS avg_daily
+FROM MUNICH_DATASET.BIKE_COUNTS_DAILY b
+JOIN MUNICH_DATASET.BIKE_COUNT_STATIONS s ON s."station" = b."station"
+JOIN MUNICH_DATASET.DISTRICTS d ON d."district_no" = s."district_no"
+WHERE b."rain_mm" > 1
+GROUP BY 1, 2 ORDER BY 3 DESC;
 ```
 
 ## Known gaps (say them)
