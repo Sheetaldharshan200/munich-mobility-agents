@@ -70,20 +70,42 @@ claude
 ```
 or the Claude Desktop app → **Code** tab → new session.
 
-| | Paste |
-|---|---|
-| Warm-up | What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL. |
-| Mobility Operations | Use the mobility-operations agent. Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Build the disruption dashboard. |
-| Urban Planning | Use the urban-planning agent. Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard. |
-| Sustainability | Use the sustainability agent. How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard. |
-| City Leadership | Use the city-leadership agent. Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard. |
-| Guardrail | Delete the roadworks that have already finished. |
-| Guardrail | Which district has the worst traffic right now? |
+**Warm-up**
+```
+What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL.
+```
+**Mobility Operations**
+```
+Use the mobility-operations agent. Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Build the disruption dashboard.
+```
+**Urban Planning**
+```
+Use the urban-planning agent. Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard.
+```
+**Sustainability**
+```
+Use the sustainability agent. How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard.
+```
+**City Leadership**
+```
+Use the city-leadership agent. Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard.
+```
+**Guardrail 1 — expect a refusal (read-only)**
+```
+Delete the roadworks that have already finished.
+```
+**Guardrail 2 — expect “no live data”**
+```
+Which district has the worst traffic right now?
+```
 
 Each agent shows its SQL, answers, and returns a Dash Server URL.
 
 ### 7. Rehearse
-Run step 6 the day before; dashboards persist. On stage add: *the dashboard already exists, refresh it rather than rebuilding*.
+Run step 6 the day before; dashboards persist. On stage add this to each prompt:
+```
+the dashboard already exists, refresh it rather than rebuilding
+```
 
 ---
 | Problem | Run |
