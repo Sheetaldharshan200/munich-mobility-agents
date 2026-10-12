@@ -50,7 +50,7 @@ def main() -> int:
             add(True, f"dashboard URL {url}")
         # 2. data
         rc, out = run([exakit, "sql", "--json",
-                       "SELECT COUNT(*) AS N FROM EXA_ALL_TABLES WHERE TABLE_SCHEMA='MUNICH'"])
+                       "SELECT COUNT(*) AS N FROM EXA_ALL_TABLES WHERE TABLE_SCHEMA='MUNICH_DATASET'"])
         n = None
         try:
             doc = json.loads(out[out.index("{"):]) if "{" in out else json.loads(out)
@@ -60,8 +60,8 @@ def main() -> int:
             n = int(m.group(1)) if m else None
         except Exception:  # noqa: BLE001
             n = None
-        add(bool(n), f"schema MUNICH loaded ({n if n is not None else 'unknown'} tables)",
-            "python3 ~/.claude/skills/munich-mobility-agents/assets/prepare_dataset.py ~/Downloads/munich-open-data.zip --out ~/munich-open-data && EXAKIT_SCHEMA=MUNICH exakit data-load ~/munich-open-data")
+        add(bool(n), f"schema MUNICH_DATASET loaded ({n if n is not None else 'unknown'} tables)",
+            "python3 ~/.claude/skills/munich-mobility-agents/assets/prepare_dataset.py ~/Downloads/munich-open-data.zip --out ~/munich-open-data && EXAKIT_SCHEMA=MUNICH_DATASET exakit data-load ~/munich-open-data")
     # 3. MCP wiring for Claude Code
     cfg = Path.home() / ".claude.json"
     servers = {}
@@ -75,7 +75,7 @@ def main() -> int:
     # 4. this package
     add((CLAUDE / "skills" / SKILL / "SKILL.md").exists(), f"skill {SKILL} installed", "python3 install.py")
     add((CLAUDE / "skills" / "persona-metrics" / "SKILL.md").exists(), "skill persona-metrics installed (dashboard pipeline)",
-        'sh -c "$(curl -fsSL https://raw.githubusercontent.com/yuvi-ex/dashserverskills/main/get.sh)"')
+        "python3 install.py")
     missing = [a for a in AGENTS if not (CLAUDE / "agents" / f"{a}.md").exists()]
     add(not missing, "four persona agents in ~/.claude/agents" + (f" (missing: {', '.join(missing)})" if missing else ""), "python3 install.py")
     md = CLAUDE / "CLAUDE.md"
@@ -83,9 +83,6 @@ def main() -> int:
     st = CLAUDE / "settings.json"
     hook = st.exists() and "block_artifacts.py" in st.read_text(encoding="utf-8")
     add(True if hook else None, "PreToolUse hook blocking artifacts" + ("" if hook else " (not installed)"), "python3 install.py  (or keep it off with --no-hook)")
-    key = Path(os.environ.get("EXAKIT_HOME") or Path.home() / ".exasol-starter-kit") / "credentials" / "anthropic_api_key"
-    add(True if key.exists() else None, "Anthropic key for the dashboard's Ask-the-data panel" + ("" if key.exists() else " (optional, keyword fallback)"),
-        "python3 ~/.claude/skills/persona-metrics/setup_llm_key.py")
 
     width = max(len(r[1]) for r in rows)
     fails = 0
@@ -93,7 +90,7 @@ def main() -> int:
         print(f"  {state}  {what.ljust(width)}" + (f"   -> {fix}" if fix and state != "OK  " else ""))
         fails += state == "FAIL"
     print()
-    print("Ready. Open a NEW Claude Code session and run the prompts in README.md." if fails == 0
+    print("Ready. Open a NEW Claude Code session and run the prompts in RUNBOOK.md." if fails == 0
           else f"{fails} to fix (lines marked FAIL). WARN lines are optional.")
     return 1 if fails else 0
 

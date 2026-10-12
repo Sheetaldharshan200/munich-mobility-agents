@@ -1,6 +1,6 @@
-# MUNICH data model
+# MUNICH_DATASET data model
 
-Schema `MUNICH`, loaded by `EXAKIT_SCHEMA=MUNICH exakit data-load ~/munich-open-data` from the flat folder that `prepare_dataset.py` writes. One table per file, table name = file name upper-cased. Column names below are the CSV headers; confirm their types with `describe_exasol_tables_and_views` because a CSV load may leave dates and decimals as VARCHAR.
+Schema `MUNICH_DATASET`, loaded by `EXAKIT_SCHEMA=MUNICH_DATASET exakit data-load ~/munich-open-data` from the flat folder that `prepare_dataset.py` writes. One table per file, table name = file name upper-cased. Column names below are the CSV headers; confirm their types with `describe_exasol_tables_and_views` because a CSV load may leave dates and decimals as VARCHAR.
 
 All coordinates are **WGS84** (`lat`, `lon` in degrees). Every point table carries `district_no` (1–25) computed by point-in-polygon against the district boundaries, so district joins are plain equality joins. Polygons are WKT in WGS84 with `lon lat` order.
 

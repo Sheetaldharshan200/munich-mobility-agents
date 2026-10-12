@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""Install the Munich demo prerequisites: four agents, the routing skill, the Dash Server rule, and persona-metrics.
+"""One install for the Munich demo: four agents, the routing skill, the Dash Server rule, the persona-metrics
+dashboard pipeline (vendored, no chat panel, no API key), and the data folder when a zip is in ~/Downloads.
 
-    python3 install.py                 install everything, then preflight
-    python3 install.py --uninstall     remove exactly what this installed
-    python3 install.py --no-hook       skip the PreToolUse hook that blocks artifacts
-    python3 install.py --skip-deps     do not install/refresh persona-metrics (dashserverskills)
-    --clipboard / --key-file PATH      forwarded to persona-metrics' key setup (keeps the key out of the transcript)
-
-Runs identically on macOS, Linux, WSL and Windows (get.sh / get.ps1 only clone and call this).
+    python3 install.py              install everything, then show what is still missing
+    python3 install.py --uninstall  remove what this installed
+    python3 install.py --no-hook    skip the hook that blocks chat artifacts
+    python3 install.py --no-data    do not look for / prepare the dataset
 """
 from __future__ import annotations
 
@@ -18,14 +16,15 @@ import re
 import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SKILL_NAME = "munich-mobility-agents"
-DEPS_REPO = os.environ.get("DASHSERVER_REPO", "https://github.com/yuvi-ex/dashserverskills")
-DEPS_DIR = Path(os.environ.get("DASHSERVER_DIR", Path.home() / "dashserverskills"))
+SKILLS = ["munich-mobility-agents", "persona-metrics"]
 START, END = "<!-- munich-mobility-agents:start -->", "<!-- munich-mobility-agents:end -->"
 HOOK_MARK = "block_artifacts.py"
+DATA_DIR = Path.home() / "munich-dataset"
+DATA_URL = "https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip"
 
 
 def claude_home() -> Path:
@@ -38,71 +37,66 @@ def copy_tree(src: Path, dst: Path) -> None:
     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store"))
 
 
-def install_skill(step) -> list[Path]:
-    placed = []
-    src = HERE / "skill" / SKILL_NAME
-    for root in (claude_home() / "skills", Path.home() / ".agents" / "skills"):
-        dst = root / SKILL_NAME
-        step(f"skill -> {dst}")
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        copy_tree(src, dst)
-        (dst / "assets").mkdir(exist_ok=True)
-        shutil.copy2(HERE / "scripts" / "prepare_dataset.py", dst / "assets" / "prepare_dataset.py")
-        shutil.copy2(HERE / "AGENTS.md", dst / "AGENTS.md")
-        placed.append(dst)
-    return placed
+def install_skills(step) -> None:
+    for name in SKILLS:
+        src = HERE / "skill" / name
+        for root in (claude_home() / "skills", Path.home() / ".agents" / "skills"):
+            dst = root / name
+            step(f"skill {name} -> {dst}")
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            copy_tree(src, dst)
+            if name == "munich-mobility-agents":
+                (dst / "assets").mkdir(exist_ok=True)
+                shutil.copy2(HERE / "scripts" / "prepare_dataset.py", dst / "assets" / "prepare_dataset.py")
+                shutil.copy2(HERE / "AGENTS.md", dst / "AGENTS.md")
 
 
-def install_agents(step) -> list[Path]:
+def install_agents(step) -> int:
     dst = claude_home() / "agents"
     dst.mkdir(parents=True, exist_ok=True)
-    placed = []
+    n = 0
     for f in sorted((HERE / "agents").glob("*.md")):
         step(f"agent -> {dst / f.name}")
         shutil.copy2(f, dst / f.name)
-        placed.append(dst / f.name)
-    return placed
+        n += 1
+    return n
 
 
-def install_rules(step) -> Path:
+def install_rules(step) -> None:
     path = claude_home() / "CLAUDE.md"
     block = (HERE / "claude-rules.md").read_text(encoding="utf-8").strip()
     existing = path.read_text(encoding="utf-8") if path.exists() else ""
     pattern = re.compile(re.escape(START) + r".*?" + re.escape(END), re.S)
-    if pattern.search(existing):
-        new = pattern.sub(lambda _m: block, existing)
-    else:
-        new = (existing.rstrip() + "\n\n" if existing.strip() else "") + block + "\n"
+    new = pattern.sub(lambda _m: block, existing) if pattern.search(existing) else \
+        (existing.rstrip() + "\n\n" if existing.strip() else "") + block + "\n"
     step(f"rule block -> {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(new, encoding="utf-8")
-    return path
 
 
 def remove_rules() -> None:
     path = claude_home() / "CLAUDE.md"
-    if not path.exists():
-        return
-    text = path.read_text(encoding="utf-8")
-    new = re.sub(r"\n?" + re.escape(START) + r".*?" + re.escape(END) + r"\n?", "\n", text, flags=re.S).strip()
-    path.write_text(new + ("\n" if new else ""), encoding="utf-8")
+    if path.exists():
+        text = path.read_text(encoding="utf-8")
+        new = re.sub(r"\n?" + re.escape(START) + r".*?" + re.escape(END) + r"\n?", "\n", text, flags=re.S).strip()
+        path.write_text(new + ("\n" if new else ""), encoding="utf-8")
 
 
-def install_hook(step, enable: bool) -> Path | None:
+def install_hook(step, enable: bool) -> None:
     settings = claude_home() / "settings.json"
     data = {}
     if settings.exists():
         try:
             data = json.loads(settings.read_text(encoding="utf-8") or "{}")
         except json.JSONDecodeError:
-            raise SystemExit(f"{settings} is not valid JSON; fix it or remove it, then re-run.")
+            raise SystemExit(f"{settings} is not valid JSON; fix or remove it, then re-run.")
     hooks = data.setdefault("hooks", {})
     pre = hooks.setdefault("PreToolUse", [])
     pre[:] = [h for h in pre if HOOK_MARK not in json.dumps(h)]
     if enable:
-        script = claude_home() / "skills" / SKILL_NAME / "assets" / HOOK_MARK
-        cmd = f'"{sys.executable}" "{script}"'
-        pre.append({"matcher": "Artifact|.*show_widget", "hooks": [{"type": "command", "command": cmd}]})
+        script = claude_home() / "skills" / "munich-mobility-agents" / "assets" / HOOK_MARK
+        pre.append({"matcher": "Artifact|.*show_widget",
+                    "hooks": [{"type": "command", "command": f'"{sys.executable}" "{script}"'}]})
         step(f"PreToolUse hook -> {settings}")
     if not pre:
         hooks.pop("PreToolUse", None)
@@ -110,44 +104,40 @@ def install_hook(step, enable: bool) -> Path | None:
         data.pop("hooks", None)
     settings.parent.mkdir(parents=True, exist_ok=True)
     settings.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-    return settings if enable else None
 
 
-def install_deps(step, args) -> str:
-    """persona-metrics (yuvi-ex/dashserverskills): the dashboard pipeline every agent uses."""
-    if args.skip_deps:
-        return "skipped"
-    if not shutil.which("git"):
-        return "git missing - install persona-metrics by hand"
-    if (DEPS_DIR / ".git").is_dir():
-        step(f"updating {DEPS_DIR}")
-        subprocess.run(["git", "-C", str(DEPS_DIR), "pull", "--quiet", "--ff-only"], check=False)
-    else:
-        step(f"cloning {DEPS_REPO} -> {DEPS_DIR}")
-        r = subprocess.run(["git", "clone", "--quiet", DEPS_REPO, str(DEPS_DIR)], check=False)
-        if r.returncode != 0:
-            return "clone failed"
-    forwarded = ["--quiet"]
-    if args.clipboard:
-        forwarded.append("--clipboard")
-    if args.key_file:
-        forwarded += ["--key-file", args.key_file]
-    step("persona-metrics install.py (asks for an optional Anthropic key, hidden input, Enter to skip)")
-    r = subprocess.run([sys.executable, str(DEPS_DIR / "install.py")] + forwarded, check=False)
-    return "installed" if r.returncode == 0 else f"exit {r.returncode}"
+def prepare_data(step) -> str:
+    """~/munich-dataset from whatever zip is at hand: the flat release zip, or the portal download."""
+    if DATA_DIR.is_dir() and any(DATA_DIR.glob("*.csv")):
+        return f"ready at {DATA_DIR}"
+    downloads = Path.home() / "Downloads"
+    flat = next((p for p in [downloads / "munich-dataset.zip", HERE / "munich-dataset.zip"] if p.is_file()), None)
+    nested = next((p for p in [downloads / "munich-open-data.zip", HERE / "munich-open-data.zip"] if p.is_file()), None)
+    if flat:
+        step(f"unzipping {flat} -> {DATA_DIR}")
+        with zipfile.ZipFile(flat) as z:
+            names = [n for n in z.namelist() if n.endswith(".csv") and "__MACOSX" not in n]
+            DATA_DIR.mkdir(parents=True, exist_ok=True)
+            for n in names:
+                (DATA_DIR / Path(n).name).write_bytes(z.read(n))
+        return f"ready at {DATA_DIR} (from {flat.name})"
+    if nested:
+        step(f"flattening {nested} -> {DATA_DIR}")
+        r = subprocess.run([sys.executable, str(HERE / "scripts" / "prepare_dataset.py"), str(nested),
+                            "--out", str(DATA_DIR)], capture_output=True, text=True)
+        return f"ready at {DATA_DIR} (from {nested.name})" if r.returncode == 0 else f"prepare failed: {r.stderr.strip()[-200:]}"
+    return f"not found - download {DATA_URL} to ~/Downloads and re-run, or unzip it anywhere"
 
 
 def uninstall() -> int:
-    for root in (claude_home() / "skills", Path.home() / ".agents" / "skills"):
-        shutil.rmtree(root / SKILL_NAME, ignore_errors=True)
+    for name in SKILLS:
+        for root in (claude_home() / "skills", Path.home() / ".agents" / "skills"):
+            shutil.rmtree(root / name, ignore_errors=True)
     for f in (HERE / "agents").glob("*.md"):
-        try:
-            (claude_home() / "agents" / f.name).unlink()
-        except FileNotFoundError:
-            pass
+        (claude_home() / "agents" / f.name).unlink(missing_ok=True)
     remove_rules()
     install_hook(lambda m: None, enable=False)
-    print(f"Removed {SKILL_NAME}: skill, four agents, CLAUDE.md rule block, PreToolUse hook. persona-metrics was left in place.")
+    print("Removed: both skills, four agents, CLAUDE.md rule block, PreToolUse hook. ~/munich-dataset was left in place.")
     return 0
 
 
@@ -155,26 +145,24 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--uninstall", action="store_true")
     ap.add_argument("--no-hook", action="store_true")
-    ap.add_argument("--skip-deps", action="store_true")
-    ap.add_argument("--clipboard", action="store_true")
-    ap.add_argument("--key-file", metavar="PATH")
+    ap.add_argument("--no-data", action="store_true")
     ap.add_argument("--verbose", action="store_true")
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
     if args.uninstall:
         return uninstall()
-
     say = (lambda *a: None) if args.quiet else print
     step = (lambda m: print(f"==> {m}")) if args.verbose else (lambda m: None)
 
-    deps = install_deps(step, args)
-    install_skill(step)
-    agents = install_agents(step)
+    install_skills(step)
+    n = install_agents(step)
     install_rules(step)
     install_hook(step, enable=not args.no_hook)
+    data = "skipped" if args.no_data else prepare_data(step)
 
-    say(f"Installed {SKILL_NAME}: {len(agents)} agents, skill, Dash Server rule, "
-        f"{'hook' if not args.no_hook else 'no hook'}; persona-metrics {deps}")
+    say(f"Installed: {n} agents, munich-mobility-agents, persona-metrics (no chat panel, no key), "
+        f"Dash Server rule{', hook' if not args.no_hook else ''}")
+    say(f"Dataset: {data}")
     say("")
     sys.stdout.flush()
     return subprocess.run([sys.executable, str(HERE / "preflight.py")]).returncode

@@ -1,6 +1,6 @@
 ---
 name: munich-mobility-agents
-description: Route every dashboard, chart or persona request on the Munich open-data demo to Dash Server and to the right persona agent. Use whenever a request mentions a dashboard, chart, graph, plot, view, visualisation, KPI page or executive view (even a bare "create a dashboard"), or names a Munich persona — mobility operations, urban planning, sustainability, city leadership — or the MUNICH schema (roadworks, MVV stops and routes, bicycle counters, districts, cycling infrastructure). Triggers — "create a dashboard", "build a dashboard", "make a chart", "visualise this", "show me a view", "executive view", "mobility operations", "urban planning", "sustainability agent", "city leadership", "Munich", "MUNICH schema", "roadworks", "Baustellen", "MVV", "bike counts".
+description: Route every dashboard, chart or persona request on the Munich open-data demo to Dash Server and to the right persona agent. Use whenever a request mentions a dashboard, chart, graph, plot, view, visualisation, KPI page or executive view (even a bare "create a dashboard"), or names a Munich persona — mobility operations, urban planning, sustainability, city leadership — or the MUNICH_DATASET schema (roadworks, MVV stops and routes, bicycle counters, districts, cycling infrastructure). Triggers — "create a dashboard", "build a dashboard", "make a chart", "visualise this", "show me a view", "executive view", "mobility operations", "urban planning", "sustainability agent", "city leadership", "Munich", "MUNICH_DATASET schema", "roadworks", "Baustellen", "MVV", "bike counts".
 ---
 
 # munich-mobility-agents
@@ -28,7 +28,7 @@ Read `references/dashboard-routing.md`. The short version:
 
 Delegate with the Agent tool (`subagent_type` = the name above) and pass the user's question verbatim. Relay the subagent's report: answer, ranked table, gaps, dashboard URL. If subagents are unavailable, follow the agent's method yourself from `AGENTS.md` in this package.
 
-## Working rules for any query on MUNICH
+## Working rules for any query on MUNICH_DATASET
 
 - Data reference: `references/data-model.md` (tables, columns, joins, date casting, haversine distance, known gaps). Confirm with `describe_exasol_tables_and_views` before writing SQL; a CSV load may have left dates and numbers as VARCHAR.
 - Show the SQL, run it through the read-only `exasol` MCP server, show the result, then interpret. Every number in an answer comes from a query that was shown.

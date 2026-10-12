@@ -7,12 +7,12 @@ sub-folder per dataset), uses German column names, mixed date formats, UTM
 coordinates (EPSG:25832) in some files and WGS84 lat/lon in others. This script
 fixes all of that once, so every agent can join the tables with plain SQL.
 
-    python3 prepare_dataset.py ~/Downloads/munich-open-data.zip --out ~/munich-open-data
-    EXAKIT_SCHEMA=MUNICH exakit data-load ~/munich-open-data
+    python3 prepare_dataset.py ~/Downloads/munich-open-data.zip --out ~/munich-dataset
+    EXAKIT_SCHEMA=MUNICH_DATASET exakit data-load ~/munich-open-data
 
 Pure standard library. No pandas, no pyproj.
 
-Output files (-> table names after load, schema MUNICH):
+Output files (-> table names after load, schema MUNICH_DATASET):
   bike_counts_daily.csv        BIKE_COUNTS_DAILY       one row per station per day, with weather
   bike_counts_15min.csv        BIKE_COUNTS_15MIN       15-minute counts
   bike_count_stations.csv      BIKE_COUNT_STATIONS     the 6 permanent counters, lat/lon, district
@@ -252,7 +252,7 @@ ROUTE_MODES = {"0": "Tram", "1": "U-Bahn", "2": "Rail", "3": "Bus", "4": "Ferry"
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("source", help="munich-open-data.zip or the extracted munich-open-data folder")
-    ap.add_argument("--out", default=str(Path.home() / "munich-open-data"), help="flat output folder")
+    ap.add_argument("--out", default=str(Path.home() / "munich-dataset"), help="flat output folder")
     ap.add_argument("--with-mvg-bikes", nargs="*", metavar="YEAR",
                     help="also build mvg_bike_trips.csv from these years (e.g. 2024 2025); large")
     ap.add_argument("--skip-stop-times", action="store_true", help="leave out the 250 MB GTFS stop_times file")
@@ -451,8 +451,8 @@ def main() -> int:
     if tmp:
         shutil.rmtree(tmp, ignore_errors=True)
     print("\nDone. Load it with:\n"
-          f"  EXAKIT_SCHEMA=MUNICH exakit data-load {out}\n"
-          "(answer the schema prompt with MUNICH; set EXAKIT_ON_EXISTING=replace to re-run without questions)")
+          f"  EXAKIT_SCHEMA=MUNICH_DATASET exakit data-load {out}\n"
+          "(answer the schema prompt with MUNICH_DATASET; set EXAKIT_ON_EXISTING=replace to re-run without questions)")
     return 0
 
 

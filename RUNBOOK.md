@@ -1,11 +1,7 @@
-# Runbook — Munich in Motion demo
-
-Step → copy → run → done. Each step takes one command. Terminal throughout, Claude Code in step 6.
-
----
+# Runbook
 
 ### 1. Install Exasol Personal
-Open <https://www.exasol.com/personal/>, or paste directly:
+<https://www.exasol.com/personal/> — copy the command for your OS, run it in a terminal.
 
 macOS / Linux / WSL
 ```bash
@@ -15,17 +11,9 @@ Windows PowerShell
 ```powershell
 irm https://www.exasol.com/install/starter-kit.ps1 | iex
 ```
-When asked: tick **Claude** (AI client) and **dash-server** (optional tools). About 2 minutes.
+Tick **Claude** and **dash-server** when asked.
 
-### 2. Add the dashboard add-on (skip if ticked in step 1)
-```bash
-exakit marketplace dash-server
-```
-```bash
-exakit mcp-setup
-```
-
-### 3. Install the agents + skill
+### 2. Install the agents
 macOS / Linux / WSL
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.sh)"
@@ -34,57 +22,48 @@ Windows PowerShell
 ```powershell
 irm https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.ps1 | iex
 ```
-Asks once for an Anthropic key (hidden; Enter to skip). Ends with a checklist: fix anything marked FAIL.
+Installs four agents, two skills, the Dash Server rule. Ends with a checklist.
 
-### 4. Prepare the data
-Put `munich-open-data.zip` in `~/Downloads`, then:
+### 3. Get the data
+Download [munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) and unzip it, or use `munich-open-data.zip` already in `~/Downloads` (step 2 turns it into `~/munich-dataset` for you).
+
+### 4. Load the data
+Copy the folder path and run:
 ```bash
-python3 ~/.claude/skills/munich-mobility-agents/assets/prepare_dataset.py ~/Downloads/munich-open-data.zip --out ~/munich-open-data
+exakit data-load ~/munich-dataset
 ```
+Schema name when asked: **MUNICH_DATASET**
 
-### 5. Load the data
-```bash
-EXAKIT_SCHEMA=MUNICH exakit data-load ~/munich-open-data
-```
-Accept schema `MUNICH` when prompted. One table per file; the GTFS stop_times file takes the longest.
-
-### 6. Check
+### 5. Check
 ```bash
 exakit status
 ```
-Want: database running, dash-server running. Dashboards: <http://127.0.0.1:5100>
+Database running, dash-server running. Dashboards at <http://127.0.0.1:5100>.
 
-### 7. Open Claude Code (new session)
+### 6. Demo
+New Claude Code session:
 ```bash
 claude
 ```
-Paste the prompts in order:
 
-| Step | Paste |
+| | Paste |
 |---|---|
-| Warm-up | `What tables are in the MUNICH schema and how many rows does each have? Show the SQL.` |
-| Mobility Operations | `Use the mobility-operations agent. Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Build the disruption dashboard.` |
-| Urban Planning | `Use the urban-planning agent. Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard.` |
-| Sustainability | `Use the sustainability agent. How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard.` |
-| City Leadership | `Use the city-leadership agent. Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard.` |
-| Guardrail 1 | `Delete the roadworks that have already finished.` → refused, read-only |
-| Guardrail 2 | `Which district has the worst traffic right now?` → no live data, says so |
+| Warm-up | What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL. |
+| Mobility Operations | Use the mobility-operations agent. Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Build the disruption dashboard. |
+| Urban Planning | Use the urban-planning agent. Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard. |
+| Sustainability | Use the sustainability agent. How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard. |
+| City Leadership | Use the city-leadership agent. Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard. |
+| Guardrail | Delete the roadworks that have already finished. |
+| Guardrail | Which district has the worst traffic right now? |
 
-Each agent shows its SQL, answers, and returns a Dash Server URL. Open it in the browser.
+Each agent shows its SQL, answers, and returns a Dash Server URL.
 
-### 8. Before the live event
-Run step 7 once the day before (dashboards take 10–20 min each and persist). On stage, add to each prompt:
-`the dashboard already exists, refresh it rather than rebuilding`
+### 7. Rehearse
+Run step 6 the day before; dashboards persist. On stage add: *the dashboard already exists, refresh it rather than rebuilding*.
 
 ---
-
-### If something is off
-
-| Seen | Run |
+| Problem | Run |
 |---|---|
-| Claude has no `dash-server` tools | `exakit mcp-setup`, restart Claude Code |
+| No `dash-server` tools in Claude | `exakit mcp-setup`, restart Claude Code |
 | Dashboard page blank / 500 | `exakit stop && exakit start` |
-| "No CSV, Parquet or JSON files" on load | you skipped step 4 |
-| Anything else | `exakit mcp-doctor`, then `python3 ~/munich-mobility-agents/preflight.py` |
-
-Links: [Exasol Personal](https://www.exasol.com/personal/) · [Starter Kit](https://github.com/exasol-labs/exasol-personal-local-starterkit) · [dash-server](https://github.com/exasol-labs/dash-server) · [persona-metrics](https://github.com/yuvi-ex/dashserverskills) · [this package](https://github.com/sheetaldharshan200/munich-mobility-agents)
+| What is missing? | `python3 ~/munich-mobility-agents/preflight.py` |

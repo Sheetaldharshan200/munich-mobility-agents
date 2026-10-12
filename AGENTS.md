@@ -4,7 +4,7 @@ One data foundation, four personas, one rule: **every answer is SQL you can read
 
 All four agents share:
 
-- **Data:** schema `MUNICH` in the local Exasol Personal database, loaded from the Munich open data portal. Table and column reference: [skill/munich-mobility-agents/references/data-model.md](skill/munich-mobility-agents/references/data-model.md).
+- **Data:** schema `MUNICH_DATASET` in the local Exasol Personal database, loaded from the Munich open data portal. Table and column reference: [the data model](skill/munich-mobility-agents/references/data-model.md).
 - **Access:** the read-only `exasol` MCP login. Agents can read everything and change nothing; the database enforces it.
 - **Method:** ASK → INSPECT (show the SQL) → RUN → VALIDATE (sanity-check counts, say what the data cannot answer) → RERUN.
 - **Output:** a short written finding with the SQL and result tables, saved to `~/munich-demo-out/<persona>.md`, and a persona-specific dashboard built on **Dash Server** through the `dash-server` MCP control plane using the `persona-metrics` pipeline. Never a chat artifact, HTML file, inline chart or Markdown-only "dashboard".
