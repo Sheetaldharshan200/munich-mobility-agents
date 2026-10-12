@@ -23,7 +23,7 @@ Other AI clients find the same skills under `~/.agents/skills/`.
 - **Quote every column, never a table.** Columns are lowercase and case-sensitive: `"district_no"`. Tables and schema are upper case, unquoted: `MUNICH_DATASET.ROADWORKS`.
 - **Reserved words as aliases break the query:** `hour`, `month`, `day`, `year`, `value`, `count`, `type`, `name`. Use `hour_of_day`, `month_key`, or double-quote the alias.
 - **The exasol MCP tool rejects a top-level `UNION ALL`** between SELECTs. Wrap it in a `WITH` block or run separate queries. `UNION` inside a CTE is fine.
-- **S-Bahn lines are stored with `route_mode = 'Tram'`.** Classify by name: `route_short_name REGEXP_LIKE 'S[0-9]+'` is S-Bahn, `N[0-9]+` is a night line. `route_mode = 'Rail'` is regional rail.
+- **S-Bahn lines are stored with `route_mode = 'Tram'`.** Classify by name: `REGEXP_INSTR("route_short_name", '^S[0-9]+$') > 0` is S-Bahn, `'^N[0-9]+'` a night line. (The infix `REGEXP_LIKE` form is rejected by the exasol MCP validator; `REGEXP_INSTR` works everywhere.) `route_mode = 'Rail'` is regional rail.
 - **One representative weekday.** The GTFS feed covers 2026-09-01 to 2026-11-30. Use the first Wednesday on or after today, clamped into that window, services with `wednesday = 1` plus `MVV_CALENDAR_DATES` exceptions. The snippet in `sql-snippets.md` does this.
 - **Stops:** `in_munich = 1` for anything per district. `location_type = 1` is a station (parent), 0 is a platform; `COALESCE("parent_station", "stop_id")` groups platforms into a station.
 - **Roadworks:** 43 open works have `start_date` NULL (text "Beginn vor mehr als einem Jahr"); treat them as active. Every row has a centroid. Open works are those with `end_date >= CURRENT_DATE`.

@@ -31,8 +31,8 @@ SELECT (SELECT ref_date FROM rd) AS ref_weekday, COUNT(*) AS services FROM svc
 ```sql
 lines AS (
     SELECT r."route_id", r."route_short_name" AS line,
-           CASE WHEN r."route_short_name" REGEXP_LIKE 'S[0-9]+' THEN 'S-Bahn'
-                WHEN r."route_short_name" REGEXP_LIKE 'N[0-9]+.*' THEN 'Night'
+           CASE WHEN REGEXP_INSTR(r."route_short_name", '^S[0-9]+$') > 0 THEN 'S-Bahn'
+                WHEN REGEXP_INSTR(r."route_short_name", '^N[0-9]+') > 0 THEN 'Night'
                 WHEN r."route_mode" = 'Rail' THEN 'Regional rail'
                 ELSE r."route_mode" END AS line_mode
     FROM MUNICH_DATASET.MVV_ROUTES r
@@ -101,3 +101,4 @@ NTILE(3) OVER (ORDER BY x DESC) AS x_tercile
 - `AS hour`, `AS month`, `AS value`, `AS count`, `AS type`: reserved; use `hour_of_day`, `month_key`, or quote the alias.
 - `UNION ALL` between top-level SELECTs through the exasol MCP tool: rejected; wrap in `WITH` or run separately.
 - `:name` placeholders: rejected; dashboards use `{name!d}` / `{name!s}` / `{name!f}`.
+- The infix `x REGEXP_LIKE 'pattern'` is rejected by the exasol MCP validator (the database itself accepts it). Use `REGEXP_INSTR(x, 'pattern') > 0`, which works in both.
