@@ -61,7 +61,7 @@ def main() -> int:
         except Exception:  # noqa: BLE001
             n = None
         add(bool(n), f"schema MUNICH_DATASET loaded ({n if n is not None else 'unknown'} tables)",
-            "python3 ~/.claude/skills/munich-mobility-agents/assets/prepare_dataset.py ~/Downloads/munich-open-data.zip --out ~/munich-open-data && EXAKIT_SCHEMA=MUNICH_DATASET exakit data-load ~/munich-open-data")
+            "unzip munich-dataset.zip, then: exakit data-load   (folder path, schema MUNICH_DATASET)")
     # 3. MCP wiring for Claude Code
     cfg = Path.home() / ".claude.json"
     servers = {}
