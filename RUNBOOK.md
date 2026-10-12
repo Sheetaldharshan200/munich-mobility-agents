@@ -121,7 +121,9 @@ Run the mobility-operations, urban-planning and sustainability agents in paralle
 This takes longer than a single agent, because four analyses run before one app is built. The result is one URL, <http://127.0.0.1:5100/apps/munich-mobility-overview>, with a tab per persona.
 
 #### C. Optional: with an Anthropic API key (Ask the data)
-Every dashboard has an **Ask the data** box. Set `ANTHROPIC_API_KEY` in a terminal to use this, then restart dash-server from that **same** terminal.
+Every dashboard on Dash Server has an **Ask the data** box. To use it:
+
+**1. Set the key** in a terminal, then restart dash-server from that same terminal.
 
 macOS / Linux / WSL
 ```bash
@@ -137,9 +139,11 @@ $env:ANTHROPIC_API_KEY = 'sk-ant-your-key'
 ```powershell
 exakit stop; exakit start
 ```
-The variable lives only in that terminal session, so repeat the two commands after a reboot. Never paste the key into a chat; a key that lands in a transcript has to be rotated.
+The key lasts only for that terminal session, so repeat this after a reboot. Never paste the key into a chat; a key that lands in a transcript has to be rotated.
 
-Then run prompt **A** or **B**, open the dashboard and type questions into the **Ask the data** box, for example:
+**2. Build the dashboard** by running the prompts from **A** or **B** in Claude.
+
+**3. Ask questions on Dash Server.** Open the dashboard URL Claude returns, then type a question into the **Ask the data** box, for example:
 ```
 Which districts have the most roadworks?
 ```
