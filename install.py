@@ -58,24 +58,60 @@ def install_agents(step) -> int:
     return n
 
 
-def install_rules(step) -> None:
-    path = claude_home() / "CLAUDE.md"
+# Where each AI client reads its always-on instructions. The rule is appended between markers
+# (idempotent) to the shared files, or written as its own rule file where the client has a rules folder.
+# A client gets the rule only when its config folder exists, i.e. it is installed on this machine.
+def client_rule_targets() -> list[tuple[str, Path, str]]:
+    home = Path.home()
+    return [
+        ("Claude Code", claude_home() / "CLAUDE.md", "append"),
+        ("Codex", home / ".codex" / "AGENTS.md", "append"),
+        ("Gemini CLI", home / ".gemini" / "GEMINI.md", "append"),
+        ("OpenCode", home / ".config" / "opencode" / "AGENTS.md", "append"),
+        ("Cursor", home / ".cursor" / "rules" / "munich-mobility-agents.mdc", "cursor"),
+        ("Continue", home / ".continue" / "rules" / "munich-mobility-agents.md", "continue"),
+    ]
+
+
+def _client_present(name: str, path: Path) -> bool:
+    if name == "Claude Code":
+        return True
+    root = path.parent.parent if path.parent.name == "rules" else path.parent
+    return root.is_dir()
+
+
+def install_rules(step) -> list[str]:
     block = (HERE / "claude-rules.md").read_text(encoding="utf-8").strip()
-    existing = path.read_text(encoding="utf-8") if path.exists() else ""
     pattern = re.compile(re.escape(START) + r".*?" + re.escape(END), re.S)
-    new = pattern.sub(lambda _m: block, existing) if pattern.search(existing) else \
-        (existing.rstrip() + "\n\n" if existing.strip() else "") + block + "\n"
-    step(f"rule block -> {path}")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(new, encoding="utf-8")
+    done = []
+    for name, path, kind in client_rule_targets():
+        if not _client_present(name, path):
+            continue
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if kind == "append":
+            existing = path.read_text(encoding="utf-8") if path.exists() else ""
+            new = pattern.sub(lambda _m: block, existing) if pattern.search(existing) else \
+                (existing.rstrip() + "\n\n" if existing.strip() else "") + block + "\n"
+        elif kind == "cursor":
+            new = "---\ndescription: Dashboards on Exasol data are built on Dash Server (Munich demo)\nalwaysApply: true\n---\n" + block + "\n"
+        else:  # continue
+            new = "---\nname: munich-mobility-agents\nalwaysApply: true\n---\n" + block + "\n"
+        step(f"rule for {name} -> {path}")
+        path.write_text(new, encoding="utf-8")
+        done.append(name)
+    return done
 
 
 def remove_rules() -> None:
-    path = claude_home() / "CLAUDE.md"
-    if path.exists():
-        text = path.read_text(encoding="utf-8")
-        new = re.sub(r"\n?" + re.escape(START) + r".*?" + re.escape(END) + r"\n?", "\n", text, flags=re.S).strip()
-        path.write_text(new + ("\n" if new else ""), encoding="utf-8")
+    for name, path, kind in client_rule_targets():
+        if not path.exists():
+            continue
+        if kind == "append":
+            text = path.read_text(encoding="utf-8")
+            new = re.sub(r"\n?" + re.escape(START) + r".*?" + re.escape(END) + r"\n?", "\n", text, flags=re.S).strip()
+            path.write_text(new + ("\n" if new else ""), encoding="utf-8")
+        else:
+            path.unlink()
 
 
 def install_hook(step, enable: bool) -> None:
@@ -110,7 +146,7 @@ def uninstall() -> int:
         (claude_home() / "agents" / f.name).unlink(missing_ok=True)
     remove_rules()
     install_hook(lambda m: None, enable=False)
-    print("Removed: both skills, four agents, CLAUDE.md rule block, PreToolUse hook.")
+    print("Removed: both skills, four agents, the Dash Server rule from every AI client, PreToolUse hook.")
     return 0
 
 
@@ -128,11 +164,11 @@ def main() -> int:
 
     install_skills(step)
     n = install_agents(step)
-    install_rules(step)
+    clients = install_rules(step)
     install_hook(step, enable=not args.no_hook)
 
     say(f"Installed: {n} agents, munich-mobility-agents, persona-metrics, "
-        f"Dash Server rule{', hook' if not args.no_hook else ''}")
+        f"Dash Server rule for {', '.join(clients)}{', hook' if not args.no_hook else ''}")
     say("")
     sys.stdout.flush()
     return subprocess.run([sys.executable, str(HERE / "preflight.py")]).returncode

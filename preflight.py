@@ -80,6 +80,13 @@ def main() -> int:
     add(not missing, "four persona agents in ~/.claude/agents" + (f" (missing: {', '.join(missing)})" if missing else ""), "python3 install.py")
     md = CLAUDE / "CLAUDE.md"
     add(md.exists() and "munich-mobility-agents:start" in md.read_text(encoding="utf-8"), "Dash Server rule block in ~/.claude/CLAUDE.md", "python3 install.py")
+    home = Path.home()
+    others = {"Codex": home / ".codex" / "AGENTS.md", "Gemini CLI": home / ".gemini" / "GEMINI.md",
+              "OpenCode": home / ".config" / "opencode" / "AGENTS.md",
+              "Cursor": home / ".cursor" / "rules" / "munich-mobility-agents.mdc",
+              "Continue": home / ".continue" / "rules" / "munich-mobility-agents.md"}
+    have = [n for n, f in others.items() if f.exists() and "munich-mobility-agents:start" in f.read_text(encoding="utf-8")]
+    add(True, "Dash Server rule in other AI clients: " + (", ".join(have) if have else "none installed on this machine"))
     st = CLAUDE / "settings.json"
     hook = st.exists() and "block_artifacts.py" in st.read_text(encoding="utf-8")
     add(True if hook else None, "PreToolUse hook blocking artifacts" + ("" if hook else " (not installed)"), "python3 install.py  (or keep it off with --no-hook)")

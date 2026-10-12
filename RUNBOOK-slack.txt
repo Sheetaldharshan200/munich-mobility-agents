@@ -13,7 +13,7 @@ irm https://www.exasol.com/install/starter-kit.ps1 | iex
 Tick *Claude* and *dash-server* when asked.
 
 *2. Install the Munich demo agents*
-Four persona agents for the talk (Mobility Operations, Urban Planning, Sustainability, City Leadership), the skill that sends every dashboard request to Dash Server instead of a chat artifact, and the dashboard builder.
+Four persona agents for the talk (Mobility Operations, Urban Planning, Sustainability, City Leadership), the skill that sends every dashboard request to Dash Server instead of a chat artifact (and installs dash-server from the marketplace if it is missing), and the dashboard builder. Applies to Claude Code and to Codex, Cursor, Gemini CLI, OpenCode and Continue when they are on the machine.
 macOS / Linux / WSL:
 ```
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.sh)"
