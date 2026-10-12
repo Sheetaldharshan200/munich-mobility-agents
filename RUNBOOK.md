@@ -75,35 +75,43 @@ or the Claude Desktop app → **Code** tab → new session.
 <tr><td><b>Warm-up</b></td><td>
 
 ```
-What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL.
+What tables are in the MUNICH_DATASET schema and how many rows does each
+have? Show the SQL.
 ```
 
 </td></tr>
 <tr><td><b>Mobility Operations</b></td><td>
 
 ```
-Use the mobility-operations agent. Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Build the disruption dashboard.
+Use the mobility-operations agent. Which current or planned roadworks
+are close to important public transport stops, high-frequency routes or
+busy cycling corridors? Build the disruption dashboard.
 ```
 
 </td></tr>
 <tr><td><b>Urban Planning</b></td><td>
 
 ```
-Use the urban-planning agent. Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard.
+Use the urban-planning agent. Which densely populated districts have
+lower scheduled public transport frequency or weaker cycling
+infrastructure? Build the planning dashboard.
 ```
 
 </td></tr>
 <tr><td><b>Sustainability</b></td><td>
 
 ```
-Use the sustainability agent. How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard.
+Use the sustainability agent. How do weather, seasonality and location
+affect cycling demand across Munich? Build the cycling demand dashboard.
 ```
 
 </td></tr>
 <tr><td><b>City Leadership</b></td><td>
 
 ```
-Use the city-leadership agent. Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard.
+Use the city-leadership agent. Where should Munich prioritise mobility
+planning or disruption mitigation based on the evidence from the other
+agents? Build the executive dashboard.
 ```
 
 </td></tr>
