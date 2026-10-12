@@ -78,6 +78,8 @@ def main() -> int:
         "python3 install.py")
     missing = [a for a in AGENTS if not (CLAUDE / "agents" / f"{a}.md").exists()]
     add(not missing, "four persona agents in ~/.claude/agents" + (f" (missing: {', '.join(missing)})" if missing else ""), "python3 install.py")
+    missing_cmd = [a for a in AGENTS if not (CLAUDE / "commands" / f"{a}.md").exists()]
+    add(not missing_cmd, "four slash commands in ~/.claude/commands (/mobility-operations, /urban-planning, /sustainability, /city-leadership)", "python3 install.py")
     md = CLAUDE / "CLAUDE.md"
     add(md.exists() and "munich-mobility-agents:start" in md.read_text(encoding="utf-8"), "Dash Server rule block in ~/.claude/CLAUDE.md", "python3 install.py")
     home = Path.home()

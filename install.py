@@ -80,6 +80,18 @@ def _client_present(name: str, path: Path) -> bool:
     return root.is_dir()
 
 
+def install_commands(step) -> int:
+    """Slash commands /mobility-operations, /urban-planning, /sustainability, /city-leadership."""
+    dst = claude_home() / "commands"
+    dst.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for f in sorted((HERE / "commands").glob("*.md")):
+        step(f"command -> {dst / f.name}")
+        shutil.copy2(f, dst / f.name)
+        n += 1
+    return n
+
+
 def install_rules(step) -> list[str]:
     block = (HERE / "claude-rules.md").read_text(encoding="utf-8").strip()
     pattern = re.compile(re.escape(START) + r".*?" + re.escape(END), re.S)
@@ -144,9 +156,11 @@ def uninstall() -> int:
             shutil.rmtree(root / name, ignore_errors=True)
     for f in (HERE / "agents").glob("*.md"):
         (claude_home() / "agents" / f.name).unlink(missing_ok=True)
+    for f in (HERE / "commands").glob("*.md"):
+        (claude_home() / "commands" / f.name).unlink(missing_ok=True)
     remove_rules()
     install_hook(lambda m: None, enable=False)
-    print("Removed: both skills, four agents, the Dash Server rule from every AI client, PreToolUse hook.")
+    print("Removed: both skills, four agents, four slash commands, the Dash Server rule from every AI client, PreToolUse hook.")
     return 0
 
 
@@ -164,10 +178,11 @@ def main() -> int:
 
     install_skills(step)
     n = install_agents(step)
+    ncmd = install_commands(step)
     clients = install_rules(step)
     install_hook(step, enable=not args.no_hook)
 
-    say(f"Installed: {n} agents, munich-mobility-agents, persona-metrics, "
+    say(f"Installed: {n} agents, {ncmd} slash commands, munich-mobility-agents, persona-metrics, "
         f"Dash Server rule for {', '.join(clients)}{', hook' if not args.no_hook else ''}")
     say("")
     sys.stdout.flush()

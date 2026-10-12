@@ -105,7 +105,7 @@ Which district has the worst traffic right now?
 ```
 
 
-Each agent shows its SQL, answers, and returns a Dash Server URL.
+Each agent shows its SQL, answers, and returns a Dash Server URL. The same four agents are also slash commands: /mobility-operations, /urban-planning, /sustainability, /city-leadership (with or without a question after them).
 
 ### 7. Rehearse
 Run step 6 the day before; dashboards persist. On stage add this to each prompt:
