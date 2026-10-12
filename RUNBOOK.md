@@ -24,17 +24,30 @@ Windows PowerShell
 ```powershell
 irm https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.ps1 | iex
 ```
-Ends with a checklist of what is still missing.
+Ends with a checklist of what is still missing. From now on, any dashboard asked for in Claude on this machine is built on Dash Server.
 
 ### 3. Get the data
 Download [munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) and unzip it, or use `munich-open-data.zip` already in `~/Downloads` (step 2 turns it into `~/munich-dataset` for you).
 
 ### 4. Load the data
-Copy the folder path and run:
 ```bash
-exakit data-load ~/munich-dataset
+exakit data-load
 ```
-Schema name when asked: **MUNICH_DATASET**
+Answer the three prompts:
+
+```
+? What would you like to load?
+  [✓] A local CSV / Parquet / JSON file, or a folder of them        ← Space to tick, Enter
+```
+```
+? Local CSV / Parquet / JSON file — or a folder of them (type back to return)
+  ~/munich-dataset                                                   ← paste the folder path
+```
+```
+? Target schema (back to return) [STARTER_KIT]
+  MUNICH_DATASET                                                     ← type this, Enter
+```
+One table per file, 13 tables. The GTFS stop_times file takes the longest.
 
 ### 5. Check
 ```bash
