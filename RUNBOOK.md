@@ -14,7 +14,7 @@ irm https://www.exasol.com/install/starter-kit.ps1 | iex
 Tick **Claude** and **dash-server** when asked.
 
 ### 2. Install the Munich demo agents
-Four persona agents for the talk (Mobility Operations, Urban Planning, Sustainability, City Leadership), the skill that sends every dashboard request to Dash Server instead of a chat artifact, and the dashboard builder. No API key.
+Four persona agents for the talk (Mobility Operations, Urban Planning, Sustainability, City Leadership), the skill that sends every dashboard request to Dash Server instead of a chat artifact, and the dashboard builder.
 
 macOS / Linux / WSL
 ```bash
@@ -24,10 +24,9 @@ Windows PowerShell
 ```powershell
 irm https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.ps1 | iex
 ```
-Ends with a checklist of what is still missing. From now on, any dashboard asked for in Claude on this machine is built on Dash Server.
 
 ### 3. Get the data
-Download [munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) and unzip it, or use `munich-open-data.zip` already in `~/Downloads` (step 2 turns it into `~/munich-dataset` for you).
+Download [munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) (18 MB) and unzip it. Copy the path of the `munich-dataset` folder.
 
 ### 4. Load the data
 ```bash
@@ -41,7 +40,7 @@ Answer the three prompts:
 ```
 ```
 ? Local CSV / Parquet / JSON file — or a folder of them (type back to return)
-  ~/munich-dataset                                                   ← paste the folder path
+  ~/Downloads/munich-dataset                                         ← paste the folder path
 ```
 ```
 ? Target schema (back to return) [STARTER_KIT]

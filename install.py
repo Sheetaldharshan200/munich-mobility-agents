@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""One install for the Munich demo: four agents, the routing skill, the Dash Server rule, the persona-metrics
-dashboard pipeline (vendored, no chat panel, no API key), and the data folder when a zip is in ~/Downloads.
+"""One install for the Munich demo: four agents, the routing skill, the Dash Server rule and the persona-metrics
+dashboard pipeline (vendored, no chat panel).
 
     python3 install.py              install everything, then show what is still missing
     python3 install.py --uninstall  remove what this installed
     python3 install.py --no-hook    skip the hook that blocks chat artifacts
-    python3 install.py --no-data    do not look for / prepare the dataset
 """
 from __future__ import annotations
 
@@ -16,15 +15,12 @@ import re
 import shutil
 import subprocess
 import sys
-import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SKILLS = ["munich-mobility-agents", "persona-metrics"]
 START, END = "<!-- munich-mobility-agents:start -->", "<!-- munich-mobility-agents:end -->"
 HOOK_MARK = "block_artifacts.py"
-DATA_DIR = Path.home() / "munich-dataset"
-DATA_URL = "https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip"
 
 
 def claude_home() -> Path:
@@ -106,29 +102,6 @@ def install_hook(step, enable: bool) -> None:
     settings.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
-def prepare_data(step) -> str:
-    """~/munich-dataset from whatever zip is at hand: the flat release zip, or the portal download."""
-    if DATA_DIR.is_dir() and any(DATA_DIR.glob("*.csv")):
-        return f"ready at {DATA_DIR}"
-    downloads = Path.home() / "Downloads"
-    flat = next((p for p in [downloads / "munich-dataset.zip", HERE / "munich-dataset.zip"] if p.is_file()), None)
-    nested = next((p for p in [downloads / "munich-open-data.zip", HERE / "munich-open-data.zip"] if p.is_file()), None)
-    if flat:
-        step(f"unzipping {flat} -> {DATA_DIR}")
-        with zipfile.ZipFile(flat) as z:
-            names = [n for n in z.namelist() if n.endswith(".csv") and "__MACOSX" not in n]
-            DATA_DIR.mkdir(parents=True, exist_ok=True)
-            for n in names:
-                (DATA_DIR / Path(n).name).write_bytes(z.read(n))
-        return f"ready at {DATA_DIR} (from {flat.name})"
-    if nested:
-        step(f"flattening {nested} -> {DATA_DIR}")
-        r = subprocess.run([sys.executable, str(HERE / "scripts" / "prepare_dataset.py"), str(nested),
-                            "--out", str(DATA_DIR)], capture_output=True, text=True)
-        return f"ready at {DATA_DIR} (from {nested.name})" if r.returncode == 0 else f"prepare failed: {r.stderr.strip()[-200:]}"
-    return f"not found - download {DATA_URL} to ~/Downloads and re-run, or unzip it anywhere"
-
-
 def uninstall() -> int:
     for name in SKILLS:
         for root in (claude_home() / "skills", Path.home() / ".agents" / "skills"):
@@ -137,7 +110,7 @@ def uninstall() -> int:
         (claude_home() / "agents" / f.name).unlink(missing_ok=True)
     remove_rules()
     install_hook(lambda m: None, enable=False)
-    print("Removed: both skills, four agents, CLAUDE.md rule block, PreToolUse hook. ~/munich-dataset was left in place.")
+    print("Removed: both skills, four agents, CLAUDE.md rule block, PreToolUse hook.")
     return 0
 
 
@@ -145,7 +118,6 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--uninstall", action="store_true")
     ap.add_argument("--no-hook", action="store_true")
-    ap.add_argument("--no-data", action="store_true")
     ap.add_argument("--verbose", action="store_true")
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
@@ -158,11 +130,9 @@ def main() -> int:
     n = install_agents(step)
     install_rules(step)
     install_hook(step, enable=not args.no_hook)
-    data = "skipped" if args.no_data else prepare_data(step)
 
-    say(f"Installed: {n} agents, munich-mobility-agents, persona-metrics (no chat panel, no key), "
+    say(f"Installed: {n} agents, munich-mobility-agents, persona-metrics, "
         f"Dash Server rule{', hook' if not args.no_hook else ''}")
-    say(f"Dataset: {data}")
     say("")
     sys.stdout.flush()
     return subprocess.run([sys.executable, str(HERE / "preflight.py")]).returncode
