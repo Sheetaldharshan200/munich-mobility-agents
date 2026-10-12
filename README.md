@@ -82,6 +82,7 @@ Scheduled service only: no passengers, delays or live traffic. Nothing synthetic
 
 | | |
 |---|---|
+| [RUNBOOK.md](RUNBOOK.md) | Step-by-step: copy, run, done |
 | [AGENTS.md](AGENTS.md) | The four agents: question, data, method, dashboard, guardrails |
 | [agents/](agents/) | Claude Code subagent files |
 | [skill/munich-mobility-agents/](skill/munich-mobility-agents/SKILL.md) | Routing skill: dashboard → Dash Server; persona → agent; data model |
