@@ -1,15 +1,15 @@
 #!/bin/sh
 # One line from nothing to ready, on macOS, Linux, WSL and Windows Git Bash:
 #
-#   sh -c "$(curl -fsSL https://raw.githubusercontent.com/yuvi-ex/munich-mobility-agents/main/get.sh)"
+#   sh -c "$(curl -fsSL https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.sh)"
 #
-# PowerShell users: irm https://raw.githubusercontent.com/yuvi-ex/munich-mobility-agents/main/get.ps1 | iex
+# PowerShell users: irm https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.ps1 | iex
 # (do not paste the curl line into PowerShell; curl is an alias there and rejects -fsSL)
 #
 # This only clones and calls install.py, so every platform runs one implementation.
 # MUNICH_AGENTS_REPO / MUNICH_AGENTS_DIR override the source and the clone location.
 set -e
-REPO="${MUNICH_AGENTS_REPO:-https://github.com/yuvi-ex/munich-mobility-agents}"
+REPO="${MUNICH_AGENTS_REPO:-https://github.com/sheetaldharshan200/munich-mobility-agents}"
 DEST="${MUNICH_AGENTS_DIR:-$HOME/munich-mobility-agents}"
 
 PY=""

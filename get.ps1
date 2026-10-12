@@ -1,11 +1,11 @@
 # One line from nothing to ready, Windows PowerShell:
 #
-#   irm https://raw.githubusercontent.com/yuvi-ex/munich-mobility-agents/main/get.ps1 | iex
+#   irm https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.ps1 | iex
 #
 # Clones the repo and calls install.py (one implementation for every platform).
 # NOTE: this file must not carry a UTF-8 BOM; it is executed through irm | iex.
 $ErrorActionPreference = "Stop"
-$Repo = if ($env:MUNICH_AGENTS_REPO) { $env:MUNICH_AGENTS_REPO } else { "https://github.com/yuvi-ex/munich-mobility-agents" }
+$Repo = if ($env:MUNICH_AGENTS_REPO) { $env:MUNICH_AGENTS_REPO } else { "https://github.com/sheetaldharshan200/munich-mobility-agents" }
 $Dest = if ($env:MUNICH_AGENTS_DIR)  { $env:MUNICH_AGENTS_DIR }  else { Join-Path $HOME "munich-mobility-agents" }
 
 $Py = $null

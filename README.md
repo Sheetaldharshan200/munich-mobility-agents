@@ -22,11 +22,11 @@ Tick **Claude** and **dash-server** when asked. Otherwise: `exakit marketplace d
 **2. Agents + skill** (this package, plus persona-metrics)
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/yuvi-ex/munich-mobility-agents/main/get.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.sh)"
 ```
 Windows PowerShell:
 ```powershell
-irm https://raw.githubusercontent.com/yuvi-ex/munich-mobility-agents/main/get.ps1 | iex
+irm https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.ps1 | iex
 ```
 
 **3. Data** — `munich-open-data.zip`, flattened and loaded into schema `MUNICH`
