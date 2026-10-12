@@ -32,19 +32,26 @@ Download [munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobil
 ```bash
 exakit data-load
 ```
-Answer the three prompts:
+Answer the three prompts.
 
+Prompt 1 — Space to tick, Enter:
 ```
 ? What would you like to load?
-  [✓] A local CSV / Parquet / JSON file, or a folder of them        ← Space to tick, Enter
+  [✓] A local CSV / Parquet / JSON file, or a folder of them
 ```
+Prompt 2 — paste the folder path, Enter:
 ```
 ? Local CSV / Parquet / JSON file — or a folder of them (type back to return)
-  ~/Downloads/munich-dataset                                         ← paste the folder path
 ```
+```
+~/Downloads/munich-dataset
+```
+Prompt 3 — paste the schema name, Enter:
 ```
 ? Target schema (back to return) [STARTER_KIT]
-  MUNICH_DATASET                                                     ← type this, Enter
+```
+```
+MUNICH_DATASET
 ```
 One table per file, 13 tables. The GTFS stop_times file takes the longest.
 
