@@ -22,7 +22,7 @@ Any request whose output is visual — dashboard, chart, graph, plot, view, visu
 Design rules that matter on stage (from the dash-server skill): let Exasol compute, Dash renders; never query at import time; `{x}` / `{x!d}` placeholders, never `:name`; check `has_error(rows)` before iterating; read-only profile only.
 
 ## App names used by the demo
-`munich-mobility-ops`, `munich-urban-planning`, `munich-sustainability`, `munich-leadership`. Reuse them; "refresh" means update the existing app.
+`munich-mobility-ops`, `munich-urban-planning`, `munich-sustainability`, `munich-leadership`, and `munich-mobility-overview` for the single four-tab dashboard. Reuse them; "refresh" means update the existing app.
 
 ## What to do if dash-server is missing or down
 Work down this list; stop at the first step that fixes it, and never substitute another renderer.

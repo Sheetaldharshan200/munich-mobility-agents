@@ -12,28 +12,31 @@ folder, so read this before handing it to someone else.
 | Data loaded in a schema | the card is built from a live database, never from a file | `exakit status` lists datasets |
 | `dash-server` add-on, running | hosts the dashboard and exposes the MCP control plane | `exakit status` shows `dash-server: running` |
 | The `dash-server` skill | stage 6 drives the control plane through it | listed in the agent's skills |
-| Anthropic API key (optional) | **semantic** text-to-SQL; without it the panel falls back to keyword matching, which fails on plurals, synonyms and intent words | run `python setup_llm_key.py` |
+| Anthropic API key (optional) | needed to use the Ask-the-data box | `export ANTHROPIC_API_KEY=...` then `exakit stop && exakit start` from the same shell |
 
 The SQL this skill emits is **Exasol dialect** (`TO_DATE`, `ADD_MONTHS`,
 `DAYS_BETWEEN`). It is portable across datasets, not across databases.
 
-## Set up the model key when you install
+## Optional: the model key for Ask the data
 
-Run this once, at install time — not after someone has pasted a key into a chat
-window:
+Every dashboard has an **Ask the data** box. Set `ANTHROPIC_API_KEY` in a terminal to use this.
+dash-server inherits the environment of the shell that starts it, so set the
+variable and restart dash-server from that same shell:
 
 ```sh
-python setup_llm_key.py
+export ANTHROPIC_API_KEY=sk-ant-...      # macOS / Linux / WSL
+exakit stop && exakit start
 ```
 
-It prompts with the input hidden, refuses anything that is not an `sk-ant-` key,
-writes it `600`, and never echoes or logs it. Pressing Enter skips: the
-dashboards still work, and the Ask-the-data panel falls back to keyword matching.
+```powershell
+$env:ANTHROPIC_API_KEY = 'sk-ant-...'    # Windows PowerShell
+exakit stop; exakit start
+```
 
-A key belongs in a file rather than the environment because dash-server is
-started by a boot entry that carries no environment — a key exported in a login
-shell never reaches it. The kit resolves its database password the same way. The
-key is read per question, so adding one later needs no restart.
+The boot entry that starts dash-server at login carries no environment, so after
+a reboot repeat the two lines, or keep the key in
+`~/.exasol-starter-kit/credentials/anthropic_api_key` (owner-readable only,
+`chmod 600`), which the panel also reads.
 
 **If a key is ever pasted into a chat, an issue, or a screen share, rotate it.**
 
@@ -163,8 +166,7 @@ stub that opens the Store and exits, and `command -v` cannot tell the two apart.
 Set `DASHSERVER_REPO` to install from a branch or a local clone, and
 `DASHSERVER_DIR` to clone somewhere other than `~/dashserverskills`.
 
-Everything after the clone is `install.py`, `preflight.py` and
-`setup_llm_key.py`. Run any of them directly with whatever interpreter you have;
+Everything after the clone is `install.py` and `preflight.py`. Run any of them directly with whatever interpreter you have;
 none of them assumes the name `python3`, which on Windows can resolve to the
 Microsoft Store stub instead of a real interpreter.
 

@@ -1724,10 +1724,45 @@ def create_dash_app(server, url_base_pathname, metadata):
                  style={**CARD, "marginTop": "0.85rem"}),
     ], style={"flex": "1 1 640px", "minWidth": 0})
 
+    chat = html.Div([
+        html.H2("Ask the data", style=H2),
+        html.Div("Answers are generated as SQL, checked, then run read-only. "
+                 "The query is always shown.",
+                 style={"fontSize": "11.5px", "color": MUTED, "margin": "0.5rem 0 0.4rem",
+                        "lineHeight": 1.5}),
+        # Whoever installs this next needs to know the model is optional, that it
+        # is theirs to supply, and where to put it -- from inside the app, not
+        # from a README they may never open.
+        html.Div([
+            html.Span("Set ANTHROPIC_API_KEY in a terminal to use this: ",
+                      style={"opacity": 0.9}),
+            html.Code("export ANTHROPIC_API_KEY=sk-ant-...  &&  exakit stop  &&  exakit start",
+                      style={"fontSize": "10.5px", "background": PAGE,
+                             "padding": "0.05rem 0.25rem", "borderRadius": "4px",
+                             "border": "1px solid " + LINE}),
+            html.Span(" (PowerShell: $$env:ANTHROPIC_API_KEY='sk-ant-...' first). "
+                      "Don't paste the key into a chat: one that lands in a "
+                      "transcript has to be rotated."),
+        ], style={"fontSize": "11px", "color": WARN, "backgroundColor": WARN_BG,
+                  "padding": "0.45rem 0.6rem", "borderRadius": "8px",
+                  "margin": "0 0 0.75rem", "lineHeight": 1.5,
+                  "display": "none" if MODEL_READY else "block"}),
+        dcc.Input(id="q-input", type="text", debounce=True,
+                  placeholder=f"e.g. {pretty(MEASURES[0]) if MEASURES else 'total'} by "
+                              f"{pretty(DIMS[0]) if DIMS else 'group'}",
+                  style={"width": "100%", "padding": "0.55rem 0.7rem", "fontSize": "13px",
+                         "borderRadius": "9px", "border": "1px solid " + LINE,
+                         "boxSizing": "border-box"}),
+        html.Button("Run", id="q-run", n_clicks=0, style={**primary, "marginTop": "0.55rem"}),
+        dcc.Loading(html.Div(id="q-out", style={"marginTop": "0.9rem"}),
+                    type="dot", color=SERIES[0]),
+    ], style={**CARD, "flex": "0 0 350px", "alignSelf": "flex-start",
+              "position": "sticky", "top": "0.9rem"})
+
     app.layout = html.Div([
         dcc.Interval(id="boot", interval=350, n_intervals=0, max_intervals=1),
         dcc.Download(id="dl"),
-        html.Div([header, html.Div([main],
+        html.Div([header, html.Div([main, chat],
                  style={"display": "flex", "gap": "0.85rem", "alignItems": "flex-start",
                         "flexWrap": "wrap", "padding": "0.85rem"})],
                  style={"backgroundColor": PAGE, "border": "1px solid " + LINE,
@@ -1895,6 +1930,40 @@ def create_dash_app(server, url_base_pathname, metadata):
                              "textDecoration": "none", "fontSize": "11.5px"})
         return dict(content=page, filename="$name-report.html"), link
 
+    @app.callback(Output("q-out", "children"), Input("q-run", "n_clicks"),
+                  Input("q-input", "value"), State("q-input", "value"),
+                  prevent_initial_call=True)
+    def _ask(_clicks, _typed, text):
+        rows, sql, error, note = answer_question(server, metadata, text)
+        blocks = []
+        if sql:
+            blocks.append(html.Details([
+                html.Summary("SQL", style={"fontSize": "11px", "color": MUTED,
+                                           "cursor": "pointer", "fontWeight": 700,
+                                           "letterSpacing": "0.04em",
+                                           "textTransform": "uppercase"}),
+                html.Pre(sql, style={"fontSize": "11px", "background": PAGE,
+                    "padding": "0.6rem", "borderRadius": "8px", "overflowX": "auto",
+                    "border": "1px solid " + LINE, "whiteSpace": "pre-wrap",
+                    "marginTop": "0.4rem", "color": INK_2})], open=False))
+        if error:
+            blocks.append(html.Div(error, style={"fontSize": "12px", "color": BAD,
+                          "backgroundColor": BAD_BG, "padding": "0.5rem 0.6rem",
+                          "borderRadius": "8px", "marginTop": "0.5rem"}))
+        elif not rows:
+            blocks.append(html.Div("The query ran and returned no rows.",
+                          style={"fontSize": "12px", "color": MUTED,
+                                 "marginTop": "0.5rem"}))
+        else:
+            if note:
+                blocks.append(html.Div(note, style={"fontSize": "11.5px", "color": WARN,
+                              "backgroundColor": WARN_BG, "padding": "0.5rem 0.6rem",
+                              "borderRadius": "8px", "marginTop": "0.5rem"}))
+            blocks.append(html.Div(data_table(rows[:25], list(rows[0].keys())),
+                                   style={"marginTop": "0.6rem"}))
+            blocks.append(html.Div(f"{len(rows)} row(s)", style={"fontSize": "11px",
+                          "color": MUTED, "marginTop": "0.35rem"}))
+        return blocks
 
     return app
 """)
@@ -2009,9 +2078,23 @@ def main() -> None:
          encoding="utf-8").write(LLM_MODULE)
     open(os.path.join(args.out, "requirements.txt"), "w",
          encoding="utf-8").write(
-        "dash>=4.0,<5.0\nplotly>=5.18\npyexasol>=2.2.2,<3.0\n")
+        "dash>=4.0,<5.0\nplotly>=5.18\npyexasol>=2.2.2,<3.0\nanthropic>=1.0\n")
     print(f"workspace written to {args.out}: {len(queries)} queries + app.py + manifest")
 
+    # Ask at the moment it matters. A new user reaches this line on their first
+    # dashboard; a note in a README they may never open does not reach them.
+    key_file = os.path.join(os.environ.get("EXAKIT_HOME",
+                            os.path.join(os.path.expanduser("~"), ".exasol-starter-kit")),
+                            "credentials", "anthropic_api_key")
+    if not (os.environ.get("ANTHROPIC_API_KEY") or os.path.exists(key_file)):
+        here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        print()
+        print("  Set ANTHROPIC_API_KEY in a terminal to use this (Ask the data),")
+        print("  then restart dash-server from that same terminal:")
+        print("      export ANTHROPIC_API_KEY=sk-ant-...      # PowerShell: $env:ANTHROPIC_API_KEY=\"sk-ant-...\"")
+        print("      exakit stop && exakit start")
+        print("  Get a key at https://console.anthropic.com")
+        print()
 
 
 if __name__ == "__main__":

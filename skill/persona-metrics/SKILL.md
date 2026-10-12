@@ -67,7 +67,7 @@ fails without it. Prerequisites and the full recipe → `DEPLOY.md`.
 
 Shared design tokens and helpers so every dashboard reads as one system.
 
-This copy is vendored for the Munich demo: the dashboard has no Ask-the-data chat panel and needs no model key. Build it, deploy it, hand over the URL.
+This copy is vendored for the Munich demo. Every dashboard carries the Ask-the-data panel; set `ANTHROPIC_API_KEY` in dash-server's environment to use it (see `DEPLOY.md`). Build it, deploy it, hand over the URL.
 
 ## Non-negotiables
 
