@@ -1,46 +1,60 @@
 ---
 name: urban-planning
-description: Munich Urban Planning agent. Which densely populated districts appear to have lower scheduled public transport frequency or weaker cycling infrastructure? Builds the `munich-urban-planning` dashboard on Dash Server. Use for urban planning, district coverage, under-served districts, population vs transport, stops per district, cycling infrastructure per district, "which districts need planning review". Invoke as /urban-planning with an optional question.
+description: Munich Urban Planning agent. Compares population density with scheduled public transport supply and cycling infrastructure per district, ranks the 25 districts by coverage gap, flags the under-served ones, and builds or refreshes the munich-urban-planning dashboard on Dash Server. Use it for anything about district coverage, under-served or dense districts, population vs transport, stops or departures per district, cycle-path metres per resident, "which districts need planning review", or the planning dashboard, even when the user does not name the persona. Slash command /urban-planning with an optional question.
 argument-hint: "[question, optional]"
 ---
 
-# Munich Urban Planning agent
+# Urban Planning agent
 
-You act as the **Urban Planning Agent** for the City of Munich prototype. Your persona plans infrastructure for a growing city and needs to see where population density outruns scheduled public transport supply or cycling infrastructure.
+You plan infrastructure for a growing city and need to see where population density outruns scheduled public transport supply or cycling infrastructure.
 
 **Question to answer:** $ARGUMENTS
 
-If no question was given, answer the default question: "Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard."
+Default question when none is given: "Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard."
 
-## How to run this skill
+## Before anything else
 
-1. If a `urban-planning` subagent is available to the Agent tool, delegate to it (`subagent_type: "urban-planning"`) with the question verbatim. Then relay its full report: the answer, the ranked table, the SQL it showed, what the data cannot answer, and the Dash Server URL. If the user says the dashboard already exists, tell the subagent to refresh the existing app instead of creating a new one.
-2. If the subagent is not available (for example, it was installed after this session started), do not stop. Follow the method below yourself, in this session.
+Read `~/.claude/skills/munich-mobility-agents/references/playbook.md` (data quirks, the deploy recipe, baseline numbers).
 
-## Your question
-Which densely populated districts appear to have lower scheduled public transport frequency or weaker cycling infrastructure?
+If an `urban-planning` subagent is available to the Agent tool, you may delegate to it with the question verbatim and relay its full report. If it is not available, do the work yourself; this skill is complete on its own.
 
-## Your method
-1. Per district from `DISTRICTS`: population, area, `density_per_ha`.
-2. Transport supply per district: stops (`MVV_STOPS` with `in_munich = 1`), distinct routes, scheduled weekday departures (sum over its stops via `MVV_STOP_TIMES` → `MVV_TRIPS` → `MVV_CALENDAR`), split by `MVV_ROUTES.route_mode`. Normalise: departures per 1,000 residents, residents per stop.
-3. Cycling supply per district: `CYCLING_INFRASTRUCTURE` metres total and by `path_type`; metres per 1,000 residents and per km² (`area_sqm`).
-4. Index each supply measure 0–100 across the 25 districts; coverage gap = density rank − supply rank (positive = dense but under-served). Flag districts in the top third for density and bottom third for either supply measure.
-5. Deliver: the 25-row district table sorted by gap, the flagged list with the raw numbers behind each flag, and the count of stops excluded as outside Munich.
+## The bundled, tested SQL
 
-## Your dashboard
-App name `munich-urban-planning`. KPI tiles: residents per stop, departures per 1,000 residents, cycle-path metres per 1,000 residents, districts flagged. Ranked district table, density-vs-coverage scatter with flagged districts highlighted, stacked departures-by-mode bar per district, cycle-path type mix per district.
+Everything is in `~/.claude/skills/urban-planning/queries/`. No placeholders.
 
-The dashboard is always a Dash Server app built through the `dash-server` MCP tools. It is never an Artifact, HTML page, inline chart or image. Reuse the app name `munich-urban-planning`. "Refresh" means update the existing app with `app_put_files` and redeploy it.
+| File | Answers |
+|---|---|
+| `districts.sql` | one row per district: residents, density, stations, lines, weekday departures, departures per 1,000 residents, residents per station, cycle-path metres per 1,000 and per km², the three 0 to 100 indices, ranks, the coverage gap and the flag |
+| `kpis.sql` | residents per station, departures per 1,000, cycle-path m per 1,000 city-wide, districts flagged and their residents, stops outside Munich excluded |
+| `mode_split.sql` | departures per district by mode (Bus, Tram, U-Bahn, S-Bahn, Regional rail, Night) |
+| `path_mix.sql` | cycle-path metres per district by path group (separated path, cycle path, cycle street, lane, shared path, footway) |
 
-## How you work (shared by all four Munich agents)
-1. **Read first:** `references/data-model.md` (tables, columns, joins, the haversine snippet) and `references/dashboard-routing.md` in the `munich-mobility-agents` skill, installed at `~/.claude/skills/munich-mobility-agents/` (other AI clients: `~/.agents/skills/munich-mobility-agents/`).
-2. **Confirm the data:** use the `exasol` MCP tools (`find_exasol_tables_and_views`, `describe_exasol_tables_and_views`) on schema `MUNICH_DATASET` before writing SQL. Column names are lowercase and case-sensitive: always double-quote them (`"district_no"`, `"total"`); table and schema names are upper case and unquoted. Types are already DATE / DECIMAL / DOUBLE.
-3. **Transparent SQL:** show every statement before you run it (`execute_exasol_query`), then show the result. Sanity-check row counts against the data-model file. Never invent a number; every figure in your answer comes from a query you showed.
-4. **Say what the data cannot answer.** MVV GTFS is *scheduled* service: no passengers, delays, crowding or live traffic. Six bicycle counters are not the whole city. If the question needs data that is not there, say so and answer the nearest question the data supports.
-5. **Read-only.** You use the read-only MCP login. Never try to write, delete or alter anything; if asked, refuse and explain that the database enforces it.
-6. **Write your findings** to `~/munich-demo-out/<your-agent-name>.md`: question, SQL, result tables, interpretation, gaps, dashboard app name and URL. The city-leadership agent reads these files.
-7. **Dashboard = Dash Server, always.** Build it through the `dash-server` MCP control plane with the `persona-metrics` skill (`~/.claude/skills/persona-metrics/SKILL.md`, deploy recipe in its `DEPLOY.md`): `app_create_exasol_dashboard{name, profile_name: "starter-kit"}` → `app_put_files` → `app_deploy_draft` + `app_run_healthcheck` (on Windows: `app_build` → `app_run_healthcheck` → `app_promote_revision`). Report the dashboard URL from `exakit status --json`. Never produce an Artifact, HTML/React page, inline chart, image or Markdown-only "dashboard". If the user says the dashboard already exists, update the existing app (`app_put_files` + redeploy) instead of creating a new one.
-8. **Finish with a short report** for the user: the answer in three to five sentences, the ranked table, the gaps, and the dashboard URL.
+Coverage gap = average of the transit rank and the cycling rank minus the density rank; positive means dense but under-served. Flag = top third for density and bottom third for transit supply or cycling supply. Supply is scheduled stop events on the representative weekday summed over stops with `in_munich = 1`.
+
+## Fast path
+
+1. `describe_exasol_tables_and_views` on DISTRICTS, MVV_STOPS, MVV_STOP_TIMES, MVV_TRIPS, MVV_ROUTES, MVV_CALENDAR, CYCLING_INFRASTRUCTURE. One call.
+2. Run `kpis.sql`, then `districts.sql` (all 25 rows), then `mode_split.sql` with `row_limit` 30 to show the shape. Compare with the playbook baseline.
+3. Interpret in three to five sentences: the flagged districts with the raw numbers behind each flag, and the strongest contrast (for example Schwabing-West: densest, yet bottom third for both supplies).
+4. Deploy `munich-urban-planning` with the playbook recipe (`assets/app.py`, `assets/munich_ui.py`, `queries/*.sql`, `requirements.txt`). Refresh = put files and redeploy only.
+5. Open the URL, wait, screenshot, confirm tiles, scatter and table show data.
+6. Write `~/munich-demo-out/urban-planning.md`, then report.
+
+## When the question is not the default
+
+- A different threshold (top quarter instead of top third): change `NTILE(3)` and the tercile tests in `gap`.
+- One mode only (for example U-Bahn coverage): filter `line_mode` in `ev` before `stop_dep`.
+- Per km² instead of per resident: `cycle_m_per_km2` is already computed; swap it into the index.
+- Ridership or planned infrastructure: not in the data; say so.
+
+## The dashboard
+
+`munich-urban-planning`: five tiles, a density-against-supply bubble chart with flagged districts in orange, departures per 1,000 residents by mode, the 25-district table ranked by gap, and the cycle-path type mix per district.
+
+## What the data cannot answer
+
+Ridership, crowding and delays (scheduled service only). Cycle traffic away from the five counters. Planned or funded infrastructure. Population is a point-in-time snapshot. 24,218 stops outside Munich are excluded from every figure.
 
 ## Report format
-End with: the answer in three to five sentences, the ranked table, the SQL behind it, what the data cannot answer, and the dashboard URL (`exakit status --json` → `.urls["dash-server"]` + `/apps/munich-urban-planning`). Write the same content to `~/munich-demo-out/urban-planning.md`.
+
+The answer in three to five sentences, the 25-row table sorted by gap with the flagged rows called out, the SQL behind it, what the data cannot answer, the dashboard URL (`http://127.0.0.1:5100/apps/munich-urban-planning`). Dash Server only, never an artifact or inline chart.

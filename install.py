@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""One install for the Munich demo: four agents (subagent + skill each), the routing skill, the Dash Server rule
-and the persona-metrics dashboard pipeline (vendored, optional Ask-the-data key via ANTHROPIC_API_KEY).
+"""One install for the Munich demo: four agents (subagent + skill with tested SQL and a ready dashboard each),
+the routing skill, the Dash Server rule and the persona-metrics dashboard pipeline (vendored, optional Ask-the-data key
+via ANTHROPIC_API_KEY).
 
     python3 install.py              install everything, then show what is still missing
     python3 install.py --uninstall  remove what this installed
@@ -42,6 +43,10 @@ def install_skills(step) -> None:
             step(f"skill {name} -> {dst}")
             dst.parent.mkdir(parents=True, exist_ok=True)
             copy_tree(src, dst)
+            if name in PERSONAS:
+                # one shared look for the four dashboards; a single source in the repo, a copy per skill when installed
+                (dst / "assets").mkdir(exist_ok=True)
+                shutil.copy2(HERE / "skill" / "_shared" / "munich_ui.py", dst / "assets" / "munich_ui.py")
             if name == "munich-mobility-agents":
                 (dst / "assets").mkdir(exist_ok=True)
                 shutil.copy2(HERE / "scripts" / "prepare_dataset.py", dst / "assets" / "prepare_dataset.py")

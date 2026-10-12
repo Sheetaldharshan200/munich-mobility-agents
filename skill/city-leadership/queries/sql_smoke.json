@@ -1,0 +1,5 @@
+{
+  "queries/priorities.sql": {"horizon": 28, "kind": "all", "w_density": 0.3, "w_gap": 0.3, "w_disruption": 0.3, "w_demand": 0.1},
+  "queries/corridors.sql": {"horizon": 28, "kind": "all", "w_density": 0.3, "w_gap": 0.3, "w_disruption": 0.3, "w_demand": 0.1},
+  "queries/kpis.sql": {"horizon": 28, "kind": "all", "w_density": 0.3, "w_gap": 0.3, "w_disruption": 0.3, "w_demand": 0.1}
+}

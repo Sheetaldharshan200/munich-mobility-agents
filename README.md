@@ -11,8 +11,8 @@ Public Munich mobility data in Exasol Personal on a laptop. Four persona agents 
 | [RUNBOOK.md](RUNBOOK.md) | Steps, commands, prompts |
 | [AGENTS.md](AGENTS.md) | The four agents: question, data, method, dashboard, guardrails |
 | [agents/](agents/) | Claude Code subagent files |
-| [skill/mobility-operations/](skill/mobility-operations/SKILL.md) · [skill/urban-planning/](skill/urban-planning/SKILL.md) · [skill/sustainability/](skill/sustainability/SKILL.md) · [skill/city-leadership/](skill/city-leadership/SKILL.md) | One skill per agent: question, method, dashboard, rules. Also the slash commands `/mobility-operations` etc.; works even when the subagent is not loaded |
-| [skill/munich-mobility-agents/](skill/munich-mobility-agents/SKILL.md) | Routing skill: dashboard → Dash Server, persona → agent, data model |
+| [skill/mobility-operations/](skill/mobility-operations/SKILL.md) · [skill/urban-planning/](skill/urban-planning/SKILL.md) · [skill/sustainability/](skill/sustainability/SKILL.md) · [skill/city-leadership/](skill/city-leadership/SKILL.md) | One skill per agent: method, tested SQL (`queries/`), ready dashboard on a shared look (`assets/`). Also the slash commands `/mobility-operations` etc.; works even when the subagent is not loaded |
+| [skill/munich-mobility-agents/](skill/munich-mobility-agents/SKILL.md) | Routing skill: dashboard → Dash Server, persona → agent; `references/playbook.md` (data quirks, deploy recipe, baseline numbers) and the data model |
 | [skill/persona-metrics/](skill/persona-metrics/SKILL.md) | Dashboard pipeline (vendored from [yuvi-ex/dashserverskills](https://github.com/yuvi-ex/dashserverskills), Ask-the-data panel kept; Anthropic key optional via `ANTHROPIC_API_KEY`) |
 | [scripts/prepare_dataset.py](scripts/prepare_dataset.py) | Portal download → flat, clean, district-tagged CSVs |
 | [Release: munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) | The load-ready data (18 MB) |

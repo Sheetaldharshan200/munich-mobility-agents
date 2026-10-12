@@ -1,0 +1,6 @@
+{
+  "queries/zones.sql": {"horizon": 28, "kind": "all"},
+  "queries/kpis.sql": {"horizon": 28, "kind": "all"},
+  "queries/districts.sql": {"horizon": 28, "kind": "all"},
+  "queries/hf_lines.sql": {"horizon": 28, "kind": "all"}
+}

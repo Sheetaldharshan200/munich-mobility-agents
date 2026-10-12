@@ -10,7 +10,11 @@ Any request whose output is visual — dashboard, chart, graph, plot, view, visu
 2. This skill's description triggers on the same words.
 3. A `PreToolUse` hook in `~/.claude/settings.json` runs `assets/block_artifacts.py`, which denies the `Artifact` tool (publishing a page) and any `show_widget` tool with a message that points back here. `MUNICH_ALLOW_ARTIFACTS=1` in the environment disables the hook for one session.
 
-## The build path (summary of persona-metrics DEPLOY.md)
+## The build path for the four Munich personas
+
+Each persona skill ships tested `queries/*.sql` and a ready `assets/app.py` on the shared `munich_ui.py` look. Follow `references/playbook.md` section 4: scaffold once with `app_create_exasol_dashboard`, `app_put_files` with the bundled files, `app_deploy_draft`, open the URL. No schema card, no metric derivation.
+
+## The build path for any other persona (summary of persona-metrics DEPLOY.md)
 1. `python3 ~/.claude/skills/persona-metrics/assets/profile_schema.py MUNICH_DATASET --json card.json` — the schema card. It is the only description of the data you may rely on.
 2. Elicit 2–5 decisions for the persona, derive metrics with `derive_metrics.py`, check coverage, validate signal (`signal_check.py`). Cut flat metrics and say so.
 3. `app_create_exasol_dashboard{name: "<app>", profile_name: "starter-kit"}` — scaffold FIRST; it writes `dash_server_exasol.py`, which the builder does not emit.

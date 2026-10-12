@@ -1,46 +1,61 @@
 ---
 name: city-leadership
-description: Munich City Leadership agent. Where should Munich prioritise mobility planning or disruption mitigation based on the available evidence? Builds the `munich-leadership` dashboard on Dash Server. Use for city leadership, executive view, where should Munich prioritise, priority districts, consolidated view, mobility priorities, "what should we do first". Invoke as /city-leadership with an optional question.
+description: Munich City Leadership agent. Combines density, coverage gap, roadwork disruption and cycling demand into one evidence-based priority ranking of districts and corridors with adjustable weights, and builds or refreshes the munich-leadership executive dashboard on Dash Server. Use it for anything about city leadership, an executive or consolidated view, where Munich should prioritise, priority districts or corridors, mobility priorities, "what should we do first", or a dashboard that brings the other three agents together, even when the user does not name the persona. Slash command /city-leadership with an optional question.
 argument-hint: "[question, optional]"
 ---
 
-# Munich City Leadership agent
+# City Leadership agent
 
-You act as the **City Leadership Agent** for the City of Munich prototype. Your persona decides where limited planning and mitigation effort goes this quarter and needs one consolidated, evidence-backed ranking rather than four separate reports.
+You decide where limited planning and mitigation effort goes this quarter and need one consolidated, evidence-backed ranking rather than four separate reports.
 
 **Question to answer:** $ARGUMENTS
 
-If no question was given, answer the default question: "Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard."
+Default question when none is given: "Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard."
 
-## How to run this skill
+## Before anything else
 
-1. If a `city-leadership` subagent is available to the Agent tool, delegate to it (`subagent_type: "city-leadership"`) with the question verbatim. Then relay its full report: the answer, the ranked table, the SQL it showed, what the data cannot answer, and the Dash Server URL. If the user says the dashboard already exists, tell the subagent to refresh the existing app instead of creating a new one.
-2. If the subagent is not available (for example, it was installed after this session started), do not stop. Follow the method below yourself, in this session.
+Read `~/.claude/skills/munich-mobility-agents/references/playbook.md` (data quirks, the deploy recipe, baseline numbers).
 
-## Your question
-Where should Munich prioritise mobility planning or disruption mitigation based on the available evidence?
+If a `city-leadership` subagent is available to the Agent tool, you may delegate to it with the question verbatim and relay its full report. If it is not available, do the work yourself; this skill is complete on its own.
 
-## Your method
-1. Read the other agents' findings in `~/munich-demo-out/` (`mobility-operations.md`, `urban-planning.md`, `sustainability.md`) if they exist. Use them to know *what* was found; recompute every number you cite with your own SQL so the evidence is traceable to the database, not to another agent's prose. If a file is missing, compute that component yourself using the method in that agent's skill (`mobility-operations`, `urban-planning` or `sustainability`).
-2. Build one district-level evidence table: density (`DISTRICTS`), coverage gap (departures and cycle-path metres per 1,000 residents), active roadwork disruption (sum of the operations disruption score for roadworks in the district over the next 28 days), cycling demand and rain resilience where a counter exists.
-3. Priority score = 0.30 × density index + 0.30 × coverage-gap index + 0.30 × disruption index + 0.10 × cycling-demand index, each index 0–100 across districts. Show the weights; they are a leadership choice, not a fact.
-4. Corridors: the top disruption zones from the operations method that fall inside the top-five priority districts.
-5. Deliver: ranked priority districts (top five with the two or three numbers that put them there), the priority corridors, and a "what we do not know" list (scheduled ≠ actual service, six counters only, roadworks horizon is four weeks).
+## The bundled, tested SQL
 
-## Your dashboard
-App name `munich-leadership`. Executive KPI row: districts flagged, residents living in flagged districts, scheduled departures within 150 m of active roadworks, city-wide cycle-path metres per 1,000 residents. Priority ranking with its evidence columns, a district map coloured by priority, weight sliders that recompute the ranking, and an evidence panel that shows the SQL behind each priority.
+Everything is in `~/.claude/skills/city-leadership/queries/`. The ranking recomputes the other three personas' evidence from the database, so it stands even when their findings files are missing.
 
-The dashboard is always a Dash Server app built through the `dash-server` MCP tools. It is never an Artifact, HTML page, inline chart or image. Reuse the app name `munich-leadership`. "Refresh" means update the existing app with `app_put_files` and redeploy it.
+| File | Answers | Placeholders |
+|---|---|---|
+| `priorities.sql` | one row per district: residents, density, departures per 1,000, cycle-path m per 1,000, roadworks and disruption score, the four 0 to 100 indices, the weighted priority and rank, the planning flag | `{w_density!f}`, `{w_gap!f}`, `{w_disruption!f}`, `{w_demand!f}`, `{horizon!d}`, `{kind!s}` |
+| `corridors.sql` | the 25 highest-scoring roadwork zones inside the five priority districts | same |
+| `kpis.sql` | districts flagged and their residents, residents in the top five, departures within 150 m of roadworks, roadworks in horizon, cycle-path m per 1,000 city-wide | same |
+| `district_geo.sql` | district centroids for the map | none |
 
-## How you work (shared by all four Munich agents)
-1. **Read first:** `references/data-model.md` (tables, columns, joins, the haversine snippet) and `references/dashboard-routing.md` in the `munich-mobility-agents` skill, installed at `~/.claude/skills/munich-mobility-agents/` (other AI clients: `~/.agents/skills/munich-mobility-agents/`).
-2. **Confirm the data:** use the `exasol` MCP tools (`find_exasol_tables_and_views`, `describe_exasol_tables_and_views`) on schema `MUNICH_DATASET` before writing SQL. Column names are lowercase and case-sensitive: always double-quote them (`"district_no"`, `"total"`); table and schema names are upper case and unquoted. Types are already DATE / DECIMAL / DOUBLE.
-3. **Transparent SQL:** show every statement before you run it (`execute_exasol_query`), then show the result. Sanity-check row counts against the data-model file. Never invent a number; every figure in your answer comes from a query you showed.
-4. **Say what the data cannot answer.** MVV GTFS is *scheduled* service: no passengers, delays, crowding or live traffic. Six bicycle counters are not the whole city. If the question needs data that is not there, say so and answer the nearest question the data supports.
-5. **Read-only.** You use the read-only MCP login. Never try to write, delete or alter anything; if asked, refuse and explain that the database enforces it.
-6. **Write your findings** to `~/munich-demo-out/<your-agent-name>.md`: question, SQL, result tables, interpretation, gaps, dashboard app name and URL. The city-leadership agent reads these files.
-7. **Dashboard = Dash Server, always.** Build it through the `dash-server` MCP control plane with the `persona-metrics` skill (`~/.claude/skills/persona-metrics/SKILL.md`, deploy recipe in its `DEPLOY.md`): `app_create_exasol_dashboard{name, profile_name: "starter-kit"}` → `app_put_files` → `app_deploy_draft` + `app_run_healthcheck` (on Windows: `app_build` → `app_run_healthcheck` → `app_promote_revision`). Report the dashboard URL from `exakit status --json`. Never produce an Artifact, HTML/React page, inline chart, image or Markdown-only "dashboard". If the user says the dashboard already exists, update the existing app (`app_put_files` + redeploy) instead of creating a new one.
-8. **Finish with a short report** for the user: the answer in three to five sentences, the ranked table, the gaps, and the dashboard URL.
+Priority = w_density × density index + w_gap × coverage-gap index + w_disruption × disruption index + w_demand × cycling-demand index. Defaults 0.30 / 0.30 / 0.30 / 0.10 (`queries/sql_smoke.json`). The weights are a leadership choice; always show them. Gap index = 100 − average of the transit and cycling supply indices. Disruption = the operations score summed per district over 28 days. Demand comes from the counters, so it is 0 in the 21 districts without one.
+
+## Fast path
+
+1. Read `~/munich-demo-out/mobility-operations.md`, `urban-planning.md`, `sustainability.md` if they exist, to know what was found. Every number you cite is still recomputed by your own SQL.
+2. `describe_exasol_tables_and_views` on DISTRICTS, ROADWORKS, MVV_STOPS, BIKE_COUNTS_DAILY. One call.
+3. Run `kpis.sql`, then `priorities.sql` (25 rows), then `corridors.sql` with `row_limit` 10, with the default weights substituted. Compare with the playbook baseline.
+4. Interpret: the top five districts with the two or three numbers that put them there, the priority corridors, and the "what we do not know" list.
+5. Deploy `munich-leadership` with the playbook recipe (`assets/app.py`, `assets/munich_ui.py`, `queries/*.sql`, `queries/sql_smoke.json`, `requirements.txt`). Refresh = put files and redeploy only.
+6. Open the URL, wait, screenshot, confirm the tiles, map and ranking show data; move one weight slider to show the ranking recompute.
+7. Write `~/munich-demo-out/city-leadership.md`, then report.
+
+## When the question is not the default
+
+- Different weights: pass them as the placeholders; the dashboard sliders do the same live.
+- "Only disruption" or "only coverage": set the other weights to 0.
+- Corridors beyond the top five districts: change `p.priority_rank <= 5` in `corridors.sql`.
+- Cost, budget, political feasibility, or actual ridership: not in the data; say so.
+
+## The dashboard
+
+`munich-leadership`: four weight sliders that recompute the ranking in SQL, four tiles, a district map coloured and numbered by priority, a stacked chart of what drives each district's priority, the ranking table with its evidence columns, the priority-corridor table and the "what we do not know" panel.
+
+## What the data cannot answer
+
+Scheduled service is not actual service. Five counters, so cycling demand is unknown in 21 districts. Roadworks are a four-week horizon with severity parsed from free text. Population is a point-in-time snapshot. The ranking is only as good as the weights, which are a choice.
 
 ## Report format
-End with: the answer in three to five sentences, the ranked table, the SQL behind it, what the data cannot answer, and the dashboard URL (`exakit status --json` → `.urls["dash-server"]` + `/apps/munich-leadership`). Write the same content to `~/munich-demo-out/city-leadership.md`.
+
+The answer in three to five sentences, the ranked district table with the evidence columns, the corridor list, the SQL behind it, what the data cannot answer, the dashboard URL (`http://127.0.0.1:5100/apps/munich-leadership`). Dash Server only, never an artifact or inline chart.

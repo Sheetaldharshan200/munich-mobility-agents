@@ -4,7 +4,7 @@ Run in a fresh Claude Code session with the `exasol` and `dash-server` MCP serve
 
 | # | Prompt | Expected |
 |---|---|---|
-| 0 | What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL. | One query on `EXA_ALL_TABLES`, a 13-row table. |
+| 0 | What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL. | One query on `EXA_ALL_TABLES`, a 15-row table. |
 | 1 | Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Show the SQL, rank the disruption zones, and build the disruption dashboard. | SQL shown, top-25 disruption zones, per-district rollup, `munich-mobility-ops` deployed, URL returned. |
 | 2 | Which densely populated districts appear to have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard. | 25-district table sorted by coverage gap, flagged districts with raw numbers, `munich-urban-planning` deployed. |
 | 3 | How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard. | Counter table with rain penalty, weekday/weekend split, recovery ranking, `munich-sustainability` deployed. |
