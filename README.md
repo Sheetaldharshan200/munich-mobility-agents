@@ -9,6 +9,7 @@ Public Munich mobility data in Exasol Personal on a laptop. Four persona agents 
 | | |
 |---|---|
 | [RUNBOOK.md](RUNBOOK.md) | Steps, commands, prompts |
+| [RUNBOOK-slack.txt](RUNBOOK-slack.txt) | The same runbook in Slack formatting, paste as-is |
 | [AGENTS.md](AGENTS.md) | The four agents: question, data, method, dashboard, guardrails |
 | [agents/](agents/) | Claude Code subagent files |
 | [skill/munich-mobility-agents/](skill/munich-mobility-agents/SKILL.md) | Routing skill: dashboard → Dash Server, persona → agent, data model |

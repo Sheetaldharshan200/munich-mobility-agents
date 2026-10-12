@@ -75,66 +75,35 @@ claude
 ```
 or the Claude Desktop app → **Code** tab → new session.
 
-<table>
-<tr><th>Step</th><th>Paste into Claude</th></tr>
-<tr><td><b>Warm-up</b></td><td>
-
+**Warm-up**
 ```
-What tables are in the MUNICH_DATASET schema and how many rows does each
-have? Show the SQL.
+What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL.
 ```
-
-</td></tr>
-<tr><td><b>Mobility Operations</b></td><td>
-
+**Mobility Operations**
 ```
-Which current or planned roadworks are close to important public
-transport stops, high-frequency routes or busy cycling corridors? Build
-the disruption dashboard.
+Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Build the disruption dashboard.
 ```
-
-</td></tr>
-<tr><td><b>Urban Planning</b></td><td>
-
+**Urban Planning**
 ```
-Which densely populated districts have lower scheduled public transport
-frequency or weaker cycling infrastructure? Build the planning
-dashboard.
+Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard.
 ```
-
-</td></tr>
-<tr><td><b>Sustainability</b></td><td>
-
+**Sustainability**
 ```
-How do weather, seasonality and location affect cycling demand across
-Munich? Build the cycling demand dashboard.
+How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard.
 ```
-
-</td></tr>
-<tr><td><b>City Leadership</b></td><td>
-
+**City Leadership**
 ```
-Where should Munich prioritise mobility planning or disruption
-mitigation based on the evidence from the other agents? Build the
-executive dashboard.
+Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard.
 ```
-
-</td></tr>
-<tr><td><b>Guardrail 1<br><sub>expect a refusal: read-only</sub></b></td><td>
-
+**Guardrail 1 (expect a refusal: read-only)**
 ```
 Delete the roadworks that have already finished.
 ```
-
-</td></tr>
-<tr><td><b>Guardrail 2<br><sub>expect: no live data</sub></b></td><td>
-
+**Guardrail 2 (expect: no live data)**
 ```
 Which district has the worst traffic right now?
 ```
 
-</td></tr>
-</table>
 
 Each agent shows its SQL, answers, and returns a Dash Server URL.
 
