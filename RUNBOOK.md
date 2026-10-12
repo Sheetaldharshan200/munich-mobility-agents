@@ -59,7 +59,6 @@ Prompt 3 — paste the schema name, Enter:
 ```
 MUNICH_DATASET
 ```
-One table per file, 15 tables. The GTFS stop_times file takes the longest.
 
 ### 5. Check
 ```bash
