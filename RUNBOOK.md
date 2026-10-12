@@ -75,28 +75,37 @@ claude
 ```
 or the Claude Desktop app → **Code** tab → new session.
 
-There are three ways to run the demo: **A** one dashboard per agent, **B** everything in one dashboard, **C** (optional) the same with the Ask the data box switched on by an API key.
+There are three ways to run the demo: **A** one dashboard per agent, **B** everything in one dashboard, **C** (optional) a free-form persona with the Ask the data box, switched on by an API key.
+
+Each agent follows its skill: it reads the shared playbook, shows and runs the tested SQL, deploys its ready-made dashboard on Dash Server, opens it to verify, and returns the URL. Expect three to five minutes per agent; the same prompt a second time refreshes the existing app and is faster.
 
 #### A. One prompt per agent, one dashboard each
 **Warm-up**
 ```
 What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL.
 ```
-**Mobility Operations**
+**Mobility Operations** → `munich-mobility-ops`
 ```
 Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Build the disruption dashboard.
 ```
-**Urban Planning**
+**Urban Planning** → `munich-urban-planning`
 ```
 Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard.
 ```
-**Sustainability**
+**Sustainability** → `munich-sustainability`
 ```
 How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard.
 ```
-**City Leadership**
+**City Leadership** → `munich-leadership` (run it last; it reads the other three findings)
 ```
 Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard.
+```
+Each of the four is also a slash command that runs the same default question: `/mobility-operations`, `/urban-planning`, `/sustainability`, `/city-leadership`. Add your own question after the command to change it, for example:
+```
+/mobility-operations Only construction works within 100 m of a tram stop.
+```
+```
+/city-leadership Weight roadwork disruption at 0.6 and ignore cycling demand.
 ```
 **Guardrail 1 (expect a refusal: read-only)**
 ```
@@ -107,8 +116,6 @@ Delete the roadworks that have already finished.
 Which district has the worst traffic right now?
 ```
 
-Each agent shows its SQL, answers, and returns a Dash Server URL. Each agent also has its own skill, which is a slash command: /mobility-operations, /urban-planning, /sustainability, /city-leadership (with or without a question after them).
-
 #### B. One prompt, one combined dashboard
 ```
 Answer all four Munich mobility questions and publish the results as ONE Dash Server dashboard named munich-mobility-overview with four tabs.
@@ -116,12 +123,12 @@ Tab 1 Mobility Operations: which current or planned roadworks are close to impor
 Tab 2 Urban Planning: which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure?
 Tab 3 Sustainability: how do weather, seasonality and location affect cycling demand across Munich?
 Tab 4 City Leadership: where should Munich prioritise mobility planning or disruption mitigation, based on the evidence in tabs 1 to 3?
-Run the mobility-operations, urban-planning and sustainability agents in parallel, then the city-leadership agent. Give every tab its KPI tiles, ranked table and charts, add the Ask the data box, show the SQL for each tab, say what the data cannot answer, and return one URL.
+Run the mobility-operations, urban-planning and sustainability agents in parallel, then the city-leadership agent. Reuse each agent's bundled SQL and dashboard as one tab each, show the SQL for each tab, say what the data cannot answer, and return one URL.
 ```
-This takes longer than a single agent, because four analyses run before one app is built. The result is one URL, <http://127.0.0.1:5100/apps/munich-mobility-overview>, with a tab per persona.
+This takes longer than a single agent, because four analyses run before one app is assembled. The result is one URL, <http://127.0.0.1:5100/apps/munich-mobility-overview>, with a tab per persona.
 
-#### C. Optional: with an Anthropic API key (Ask the data)
-Every dashboard on Dash Server has an **Ask the data** box. To use it:
+#### C. Optional: a free-form persona with Ask the data (needs an Anthropic API key)
+The four persona dashboards above are fixed designs. Any other persona goes through the generic dashboard builder, and those dashboards carry an **Ask the data** box that turns a typed question into SQL, runs it read-only and shows the query. To use it:
 
 **1. Set the key** in a terminal, then restart dash-server from that same terminal.
 
@@ -141,14 +148,14 @@ exakit stop; exakit start
 ```
 The key lasts only for that terminal session, so repeat this after a reboot. Never paste the key into a chat; a key that lands in a transcript has to be rotated.
 
-**2. Build the dashboard** by running the prompts from **A** or **B** in Claude.
+**2. Build a dashboard for a persona outside the four**, for example:
+```
+Build a dashboard for the head of the MVV bus network on the MUNICH_DATASET schema: which bus lines run most often, where their stops cluster, and which of them have roadworks beside a stop this month.
+```
 
-**3. Ask questions on Dash Server.** Open the dashboard URL Claude returns, then type a question into the **Ask the data** box, for example:
+**3. Ask questions on Dash Server.** Open the URL Claude returns, then type a question into the **Ask the data** box, for example:
 ```
 Which districts have the most roadworks?
-```
-```
-Average daily cyclists per counter on rainy days
 ```
 ```
 Number of stops per district
