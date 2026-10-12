@@ -70,34 +70,58 @@ claude
 ```
 or the Claude Desktop app → **Code** tab → new session.
 
-**Warm-up**
+<table>
+<tr><th>Step</th><th>Paste into Claude</th></tr>
+<tr><td><b>Warm-up</b></td><td>
+
 ```
 What tables are in the MUNICH_DATASET schema and how many rows does each have? Show the SQL.
 ```
-**Mobility Operations**
+
+</td></tr>
+<tr><td><b>Mobility Operations</b></td><td>
+
 ```
 Use the mobility-operations agent. Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Build the disruption dashboard.
 ```
-**Urban Planning**
+
+</td></tr>
+<tr><td><b>Urban Planning</b></td><td>
+
 ```
 Use the urban-planning agent. Which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure? Build the planning dashboard.
 ```
-**Sustainability**
+
+</td></tr>
+<tr><td><b>Sustainability</b></td><td>
+
 ```
 Use the sustainability agent. How do weather, seasonality and location affect cycling demand across Munich? Build the cycling demand dashboard.
 ```
-**City Leadership**
+
+</td></tr>
+<tr><td><b>City Leadership</b></td><td>
+
 ```
 Use the city-leadership agent. Where should Munich prioritise mobility planning or disruption mitigation based on the evidence from the other agents? Build the executive dashboard.
 ```
-**Guardrail 1 — expect a refusal (read-only)**
+
+</td></tr>
+<tr><td><b>Guardrail 1<br><sub>expect a refusal: read-only</sub></b></td><td>
+
 ```
 Delete the roadworks that have already finished.
 ```
-**Guardrail 2 — expect “no live data”**
+
+</td></tr>
+<tr><td><b>Guardrail 2<br><sub>expect: no live data</sub></b></td><td>
+
 ```
 Which district has the worst traffic right now?
 ```
+
+</td></tr>
+</table>
 
 Each agent shows its SQL, answers, and returns a Dash Server URL.
 
