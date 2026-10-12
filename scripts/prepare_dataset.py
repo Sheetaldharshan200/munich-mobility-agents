@@ -217,7 +217,7 @@ def read_csv(path: Path, delimiter=None, encoding="utf-8-sig"):
 def write_csv(path: Path, header: list[str], rows):
     n = 0
     with path.open("w", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh)
+        w = csv.writer(fh, lineterminator="\n")  # LF only: exapump passes CRLF through
         w.writerow(header)
         for r in rows:
             w.writerow([r.get(h, "") for h in header])
@@ -421,8 +421,10 @@ def main() -> int:
 
     if not args.skip_stop_times:
         src_st = d_mvv / "stop_times.csv"
-        print(f"  copying {src_st.name} ({src_st.stat().st_size / 1e6:.0f} MB) -> mvv_stop_times.csv")
-        shutil.copyfile(src_st, out / "mvv_stop_times.csv")
+        print(f"  copying {src_st.name} ({src_st.stat().st_size / 1e6:.0f} MB) -> mvv_stop_times.csv (LF endings)")
+        with src_st.open("rb") as fin, (out / "mvv_stop_times.csv").open("wb") as fout:
+            for chunk in iter(lambda: fin.read(1 << 20), b""):
+                fout.write(chunk.replace(b"\r\n", b"\n"))
 
     # --- 7. optional MVG bike trips ------------------------------------------------
     if args.with_mvg_bikes:
