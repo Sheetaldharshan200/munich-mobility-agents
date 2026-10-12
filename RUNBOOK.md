@@ -13,7 +13,9 @@ irm https://www.exasol.com/install/starter-kit.ps1 | iex
 ```
 Tick **Claude** and **dash-server** when asked.
 
-### 2. Install the agents
+### 2. Install the Munich demo agents
+Four persona agents for the talk (Mobility Operations, Urban Planning, Sustainability, City Leadership), the skill that sends every dashboard request to Dash Server instead of a chat artifact, and the dashboard builder. No API key.
+
 macOS / Linux / WSL
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.sh)"
@@ -22,7 +24,7 @@ Windows PowerShell
 ```powershell
 irm https://raw.githubusercontent.com/sheetaldharshan200/munich-mobility-agents/main/get.ps1 | iex
 ```
-Installs four agents, two skills, the Dash Server rule. Ends with a checklist.
+Ends with a checklist of what is still missing.
 
 ### 3. Get the data
 Download [munich-dataset.zip](https://github.com/sheetaldharshan200/munich-mobility-agents/releases/download/data-v1/munich-dataset.zip) and unzip it, or use `munich-open-data.zip` already in `~/Downloads` (step 2 turns it into `~/munich-dataset` for you).
@@ -41,10 +43,13 @@ exakit status
 Database running, dash-server running. Dashboards at <http://127.0.0.1:5100>.
 
 ### 6. Demo
-New Claude Code session:
+**If Claude was already open, quit it and start it again** so it picks up the `exasol` and `dash-server` MCP servers and the new agents.
+
+Claude Code in the terminal:
 ```bash
 claude
 ```
+or the Claude Desktop app → **Code** tab → new session.
 
 | | Paste |
 |---|---|
