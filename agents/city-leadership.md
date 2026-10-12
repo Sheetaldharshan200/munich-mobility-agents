@@ -5,7 +5,7 @@ description: Munich City Leadership data agent. Use for prioritisation questions
 
 You are the **City Leadership Agent** for the City of Munich prototype: one consolidated, evidence-backed ranking of districts and corridors for this quarter's planning and mitigation effort.
 
-Your complete method, the tested SQL and the ready dashboard are in the skill of the same name. Read it and follow it:
+Your complete method, the SQL building blocks and the dashboard skeleton are reached through the skill of the same name. Read it and follow it:
 
     ~/.claude/skills/city-leadership/SKILL.md
 

@@ -1,14 +1,17 @@
 # Playbook for the four Munich persona agents
 
 Read this once per session. It holds what every earlier run spent most of its time rediscovering:
-the data quirks, the exact deploy recipe for Dash Server, and the baseline numbers to sanity-check against.
+the data quirks, the exact deploy recipe for Dash Server, and the orders of magnitude to sanity-check against.
+It does not hold the answers. The queries, the score and the interpretation are the agent's own work, shown live.
 
 ## 1. Where things are
 
 | What | Path |
 |---|---|
-| Persona skill (method, bundled SQL, dashboard) | `~/.claude/skills/<persona>/SKILL.md` with `queries/*.sql` and `assets/app.py` |
-| Shared dashboard look (tokens, tiles, chart theme) | `~/.claude/skills/<persona>/assets/munich_ui.py` (same file in all four) |
+| Persona skill (persona, question, method, dashboard spec) | `~/.claude/skills/<persona>/SKILL.md` |
+| SQL building blocks (weekday service, line modes, distance, indices) | `~/.claude/skills/munich-mobility-agents/references/sql-snippets.md` |
+| Shared dashboard look (tokens, tiles, chart theme, tables, maps) | `~/.claude/skills/<persona>/assets/munich_ui.py` (same file in all four) |
+| App skeleton to start from | `~/.claude/skills/<persona>/assets/app_skeleton.py` |
 | Data model | `~/.claude/skills/munich-mobility-agents/references/data-model.md` |
 | Findings for the leadership agent | `~/munich-demo-out/<persona>.md` |
 
@@ -21,7 +24,7 @@ Other AI clients find the same skills under `~/.agents/skills/`.
 - **Reserved words as aliases break the query:** `hour`, `month`, `day`, `year`, `value`, `count`, `type`, `name`. Use `hour_of_day`, `month_key`, or double-quote the alias.
 - **The exasol MCP tool rejects a top-level `UNION ALL`** between SELECTs. Wrap it in a `WITH` block or run separate queries. `UNION` inside a CTE is fine.
 - **S-Bahn lines are stored with `route_mode = 'Tram'`.** Classify by name: `route_short_name REGEXP_LIKE 'S[0-9]+'` is S-Bahn, `N[0-9]+` is a night line. `route_mode = 'Rail'` is regional rail.
-- **One representative weekday.** The GTFS feed covers 2026-09-01 to 2026-11-30. Use the first Wednesday on or after today, clamped into that window, services with `wednesday = 1` plus `MVV_CALENDAR_DATES` exceptions. The bundled SQL does this.
+- **One representative weekday.** The GTFS feed covers 2026-09-01 to 2026-11-30. Use the first Wednesday on or after today, clamped into that window, services with `wednesday = 1` plus `MVV_CALENDAR_DATES` exceptions. The snippet in `sql-snippets.md` does this.
 - **Stops:** `in_munich = 1` for anything per district. `location_type = 1` is a station (parent), 0 is a platform; `COALESCE("parent_station", "stop_id")` groups platforms into a station.
 - **Roadworks:** 43 open works have `start_date` NULL (text "Beginn vor mehr als einem Jahr"); treat them as active. Every row has a centroid. Open works are those with `end_date >= CURRENT_DATE`.
 - **Cycling infrastructure:** drop `path_type = 'Dummy'`. Segment midpoints are `mid_lat`, `mid_lon`.
@@ -31,16 +34,21 @@ Other AI clients find the same skills under `~/.agents/skills/`.
 
 ## 3. The fast path, step by step
 
-Target: under ten minutes from question to URL. The bundled SQL is already tested, so the work is to run it, explain it, deploy it.
+Target: about ten minutes from question to URL, with the analysis done live. Speed comes from not rediscovering
+the mechanics, not from skipping the work.
 
-1. **Confirm the data** with one `describe_exasol_tables_and_views` call for the tables the persona uses. Skip the row counts; they are in section 5.
-2. **Run the bundled queries** through `execute_exasol_query`, showing each statement before its result. Use `row_limit` 25 for the ranking query. Substitute placeholders with the `sql_smoke.json` values. Compare the headline numbers with section 5; a mismatch means the data changed, say so.
-3. **Interpret** in three to five sentences, every number taken from a result you showed.
-4. **Deploy** with the recipe in section 4.
-5. **Verify in the browser**, not just with the health check: open the URL, wait about eight seconds, take a screenshot, confirm the tiles and the ranked table show numbers. Health probes do not execute callbacks.
-6. **Write** `~/munich-demo-out/<persona>.md` (question, SQL, result tables, interpretation, gaps, app name, URL) and finish with the report format in the skill.
-
-If the question is the persona's default question, do not redesign anything. If it differs, change only the query that needs changing and keep the shared CTEs (`feed`, `rd`, `svc`, `lines`, `wt`, `ev`, `stp`); they are the slow part to get right.
+1. **Confirm the data** with one `describe_exasol_tables_and_views` call for the tables the persona uses.
+2. **Design three to five queries** from the persona's method, assembling them from `sql-snippets.md` (the weekday
+   service set, line modes, the distance pattern). Show each statement, run it through `execute_exasol_query`,
+   show the result. Use `row_limit` 25 for a ranking. Check row counts against section 5.
+3. **Interpret** in three to five sentences; every number comes from a result you showed.
+4. **Build the dashboard** from `assets/app_skeleton.py` and `munich_ui.py`: copy the skeleton to `app.py`,
+   save each query as `queries/<name>.sql` with pyexasol placeholders where the page has a control, replace the
+   TODOs with the persona's tiles, charts and ranked table. Let Exasol aggregate; the app only renders.
+5. **Deploy** with section 4, then **verify in the browser**: open the URL, wait about eight seconds, screenshot,
+   confirm the tiles and the ranked table show numbers. Health probes do not execute callbacks.
+6. **Write** `~/munich-demo-out/<persona>.md` (question, SQL, result tables, interpretation, gaps, app name, URL)
+   and finish with the report format in the skill.
 
 ## 4. Deploy recipe for Dash Server (macOS, Linux, WSL)
 
@@ -50,7 +58,7 @@ The app name is fixed per persona: `munich-mobility-ops`, `munich-urban-planning
    - **Exists** ("refresh"): go to step 3; never create a second app.
    - **Does not exist**: `app_create_exasol_dashboard{name, profile_name: "starter-kit", title, start_immediately: false}`. This writes `dash_server_exasol.py` and binds the read-only profile; the scaffold queries it generates are replaced in the next step.
 2. Nothing else to configure: credentials stay in the server-side profile. Never write `pyexasol.connect`, a DSN or a password into app files.
-3. `app_put_files{name, files: [...]}` with, from the persona skill folder: `assets/app.py` as `app.py`, `assets/munich_ui.py` as `munich_ui.py`, every `queries/*.sql` as `queries/<file>.sql`, `queries/sql_smoke.json` if the skill has one, and `requirements.txt` with exactly:
+3. `app_put_files{name, files: [...]}` with: your `app.py`, `munich_ui.py` copied unchanged from the skill's `assets/`, every query as `queries/<name>.sql`, a `queries/sql_smoke.json` with sample values for every placeholder (`{"queries/zones.sql": {"horizon": 28}}`), and `requirements.txt` with exactly:
    ```
    dash>=4.0,<5.0
    plotly>=5.24
@@ -64,17 +72,24 @@ Windows: `app_deploy_draft` cannot pass there (its sql_smoke path check is broke
 
 If the `dash-server` tools are missing from the session: `EXAKIT_MARKETPLACE_ADDONS=dash-server exakit marketplace`, `exakit mcp-setup`, `exakit start`, then tell the user to restart Claude. Never render a dashboard any other way.
 
-## 5. Baseline numbers (snapshot loaded 2026-10-12; today = 2026-10-12, reference weekday 2026-10-14)
+## 5. Orders of magnitude (snapshot loaded 2026-10-12)
 
-| Persona | Headline results |
-|---|---|
-| mobility-operations | 3,370 open roadworks, 6 planned; 1,525 within 150 m of a stop; 199,764 weekday departures at those stops; 52 of 62 high-frequency lines touched; top zone Frankfurter Ring 149 (score 17.44) |
-| urban-planning | 1,440 residents per station; 249.3 departures per 1,000 residents; 698 cycle-path m per 1,000; 8 districts flagged (437,489 residents); biggest gap Schwabing-West (22.0) |
-| sustainability | 2,211,015 cyclists counted, 5 counters; busiest Erhardtstr. (4,765 per day); rain penalty 31 to 37 %, average 34 %; weekday/weekend ratio 1.18 (Erhardt) to 2.07 (Hirsch); Hirsch recovers best (1.03) |
-| city-leadership | default weights 0.3/0.3/0.3/0.1: Ludwigsvorstadt-Isarvorstadt first (80.2), then Schwabing-West, Au-Haidhausen, Maxvorstadt, Neuhausen-Nymphenburg; 336,998 residents in the top five |
+Use these to catch a broken join, not as results.
 
-Table row counts: ROADWORKS 5,702; MVV_STOPS 28,330; MVV_STOP_TIMES 2,176,946; MVV_TRIPS 112,882; CYCLING_INFRASTRUCTURE 21,172; BIKE_COUNTS_DAILY 972; DISTRICTS 25.
+| Table | Rows | Note |
+|---|---|---|
+| ROADWORKS | 5,702 | about 3,400 open (end_date on or after today), a handful planned with a future start |
+| MVV_STOPS | 28,330 | about 4,100 with `in_munich = 1`, 24,218 outside |
+| MVV_STOP_TIMES | 2,176,946 | a weekday service set yields on the order of 2 million stop events |
+| MVV_TRIPS | 112,882 | about 55,000 run on a Wednesday |
+| MVV_ROUTES | 906 | 834 bus, 33 regional rail; U-Bahn, tram and S-Bahn in the rest |
+| CYCLING_INFRASTRUCTURE | 21,172 | about 1,100 km in total, 38 Dummy rows |
+| BIKE_COUNTS_DAILY | 972 | 5 counters with data, Jan to Jul 2026 |
+| DISTRICTS | 25 | |
+
+A proximity join of open roadworks to Munich stops within 150 m returns on the order of a thousand roadworks,
+not tens of thousands and not a dozen. A per-district query returns 25 rows (26 if roadworks without a district are kept).
 
 ## 6. Everything in one dashboard (the single-prompt demo)
 
-App name `munich-mobility-overview`. Run the three specialist agents in parallel, then city-leadership, then build one app: copy each persona's `queries/*.sql` into `queries/<persona>/`, one `munich_ui.py`, and an `app.py` with `dcc.Tabs`, one tab per persona. Each tab's layout and callbacks are the persona's `assets/app.py` with component ids prefixed by the persona (`ops-map`, `plan-scatter`) and query paths pointing at the sub-folder. Deploy with the recipe above. Do not also redeploy the four single apps.
+App name `munich-mobility-overview`. Run the three specialist agents in parallel, then city-leadership. Each agent writes its queries and findings; the assembler puts the queries under `queries/<persona>/`, one `munich_ui.py`, and an `app.py` with `dcc.Tabs`, one tab per persona, built from the skeleton with component ids prefixed by the persona (`ops-map`, `plan-scatter`). Deploy with the recipe above. Do not also redeploy the four single apps.

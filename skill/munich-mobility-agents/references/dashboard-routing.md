@@ -12,7 +12,7 @@ Any request whose output is visual — dashboard, chart, graph, plot, view, visu
 
 ## The build path for the four Munich personas
 
-Each persona skill ships tested `queries/*.sql` and a ready `assets/app.py` on the shared `munich_ui.py` look. Follow `references/playbook.md` section 4: scaffold once with `app_create_exasol_dashboard`, `app_put_files` with the bundled files, `app_deploy_draft`, open the URL. No schema card, no metric derivation.
+The agent writes its own queries (building blocks in `references/sql-snippets.md`) and its own `app.py` from the skill's `assets/app_skeleton.py` on the shared `assets/munich_ui.py` look. Then `references/playbook.md` section 4: scaffold once with `app_create_exasol_dashboard`, `app_put_files` with `app.py`, `munich_ui.py`, `queries/*.sql`, `queries/sql_smoke.json` and `requirements.txt`, `app_deploy_draft`, open the URL. No schema card, no metric derivation.
 
 ## The build path for any other persona (summary of persona-metrics DEPLOY.md)
 1. `python3 ~/.claude/skills/persona-metrics/assets/profile_schema.py MUNICH_DATASET --json card.json` — the schema card. It is the only description of the data you may rely on.
