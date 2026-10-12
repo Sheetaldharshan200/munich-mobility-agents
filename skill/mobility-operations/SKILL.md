@@ -1,6 +1,6 @@
 ---
 name: mobility-operations
-description: Munich Mobility Operations agent: Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Builds the `munich-mobility-ops` dashboard on Dash Server. Use for roadworks, Baustellen, disruption zones, construction near public transport stops, high-frequency routes or busy cycling corridors, diversion planning, operational review, "which routes are affected". Invoke as /mobility-operations with an optional question.
+description: Munich Mobility Operations agent. Which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors? Builds the `munich-mobility-ops` dashboard on Dash Server. Use for roadworks, Baustellen, disruption zones, construction near public transport stops, high-frequency routes or busy cycling corridors, diversion planning, operational review, "which routes are affected". Invoke as /mobility-operations with an optional question.
 argument-hint: "[question, optional]"
 ---
 

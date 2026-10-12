@@ -1,6 +1,6 @@
 ---
 name: city-leadership
-description: Munich City Leadership agent: Where should Munich prioritise mobility planning or disruption mitigation based on the available evidence? Builds the `munich-leadership` dashboard on Dash Server. Use for city leadership, executive view, where should Munich prioritise, priority districts, consolidated view, mobility priorities, "what should we do first". Invoke as /city-leadership with an optional question.
+description: Munich City Leadership agent. Where should Munich prioritise mobility planning or disruption mitigation based on the available evidence? Builds the `munich-leadership` dashboard on Dash Server. Use for city leadership, executive view, where should Munich prioritise, priority districts, consolidated view, mobility priorities, "what should we do first". Invoke as /city-leadership with an optional question.
 argument-hint: "[question, optional]"
 ---
 

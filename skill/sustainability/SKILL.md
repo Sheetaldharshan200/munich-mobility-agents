@@ -1,6 +1,6 @@
 ---
 name: sustainability
-description: Munich Sustainability agent: How do weather, seasonality and location affect cycling demand across Munich? Builds the `munich-sustainability` dashboard on Dash Server. Use for cycling demand, bike counts, Radzählstellen, weather and cycling, rain sensitivity, seasonality, weekday vs weekend, "which counter recovers fastest". Invoke as /sustainability with an optional question.
+description: Munich Sustainability agent. How do weather, seasonality and location affect cycling demand across Munich? Builds the `munich-sustainability` dashboard on Dash Server. Use for cycling demand, bike counts, Radzählstellen, weather and cycling, rain sensitivity, seasonality, weekday vs weekend, "which counter recovers fastest". Invoke as /sustainability with an optional question.
 argument-hint: "[question, optional]"
 ---
 

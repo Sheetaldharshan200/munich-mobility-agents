@@ -1,6 +1,6 @@
 ---
 name: urban-planning
-description: Munich Urban Planning agent: Which densely populated districts appear to have lower scheduled public transport frequency or weaker cycling infrastructure? Builds the `munich-urban-planning` dashboard on Dash Server. Use for urban planning, district coverage, under-served districts, population vs transport, stops per district, cycling infrastructure per district, "which districts need planning review". Invoke as /urban-planning with an optional question.
+description: Munich Urban Planning agent. Which densely populated districts appear to have lower scheduled public transport frequency or weaker cycling infrastructure? Builds the `munich-urban-planning` dashboard on Dash Server. Use for urban planning, district coverage, under-served districts, population vs transport, stops per district, cycling infrastructure per district, "which districts need planning review". Invoke as /urban-planning with an optional question.
 argument-hint: "[question, optional]"
 ---
 
