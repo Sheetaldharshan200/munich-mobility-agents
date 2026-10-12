@@ -24,5 +24,12 @@ Design rules that matter on stage (from the dash-server skill): let Exasol compu
 ## App names used by the demo
 `munich-mobility-ops`, `munich-urban-planning`, `munich-sustainability`, `munich-leadership`. Reuse them; "refresh" means update the existing app.
 
-## What to say if dash-server is down
-"The dash-server add-on is not running, so I cannot build the dashboard yet. Starting it with `exakit start`." Then do that. If the MCP tools are absent from the session: `exakit mcp-setup`, then the user must restart Claude Code. Never substitute another renderer.
+## What to do if dash-server is missing or down
+Work down this list; stop at the first step that fixes it, and never substitute another renderer.
+
+1. `exakit status` — is dash-server `running`, `stopped`, or `not installed`?
+2. Not installed → `exakit marketplace dash-server` (installs the add-on; non-interactive form: `EXAKIT_MARKETPLACE_ADDONS=dash-server exakit marketplace`).
+3. `exakit mcp-setup` — registers the control plane as the `dash-server` MCP server in Claude Code.
+4. `exakit start` — starts the database and every add-on, dash-server included.
+5. Tell the user: "dash-server is installed and running; restart Claude so its tools load, then ask again." The tools of a server registered during a session appear only in the next session.
+6. Stopped but installed → step 4 only. Page blank or 500 while the control plane answers → `exakit stop && exakit start`.

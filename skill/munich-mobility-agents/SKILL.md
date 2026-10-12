@@ -13,7 +13,7 @@ Read `references/dashboard-routing.md`. The short version:
 
 - "Dashboard", "chart", "graph", "plot", "view", "visualise", "KPI page", "executive view" → build a **Dash Server** app through the `dash-server` MCP control plane using the `persona-metrics` skill (`~/.claude/skills/persona-metrics/SKILL.md`, deploy recipe in its `DEPLOY.md`). Hand back the URL from `exakit status --json` (default `http://127.0.0.1:5100`).
 - Never an Artifact, HTML/React page, `show_widget`, inline SVG, matplotlib/plotly image, Streamlit app, or a Markdown table labelled "dashboard". A `PreToolUse` hook (`assets/block_artifacts.py`) blocks the Artifact and widget tools on demo machines; if you hit it, that is the rule working, not an error to route around.
-- `dash-server` tools missing from the session → say so, run `exakit mcp-setup` and `exakit start`, and tell the user to restart the client. Do not fall back to another renderer.
+- `dash-server` tools missing from the session → If the dash-server tools are missing, do not stop and do not fall back: install the add-on with `exakit marketplace dash-server`, register it with `exakit mcp-setup`, start it with `exakit start`, confirm with `exakit status`, then tell the user to restart Claude so the dash-server tools load, and continue from there. Never fall back to another renderer.
 - Bare "create a dashboard" with no subject → ask one question (which persona or which question), then build on Dash Server.
 - "The dashboard already exists, refresh it" → update the existing app (`app_put_files` + redeploy), do not create a second one.
 

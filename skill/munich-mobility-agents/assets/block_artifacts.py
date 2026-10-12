@@ -18,9 +18,10 @@ MESSAGE = (
     "dash-server MCP control plane with the persona-metrics skill "
     "(app_create_exasol_dashboard -> app_put_files -> app_deploy_draft -> app_run_healthcheck; "
     "on Windows app_build -> app_run_healthcheck -> app_promote_revision) and give the user the URL "
-    "from `exakit status --json`. If the dash-server tools are missing, say so and run "
-    "`exakit mcp-setup` / `exakit start` instead of falling back. Set MUNICH_ALLOW_ARTIFACTS=1 to "
-    "override for one session."
+    "from `exakit status --json`. If the dash-server tools are missing, do NOT fall back: install the "
+    "add-on with `exakit marketplace dash-server`, then `exakit mcp-setup`, then `exakit start`, check "
+    "`exakit status`, and ask the user to restart Claude so the dash-server tools load. "
+    "Set MUNICH_ALLOW_ARTIFACTS=1 to override for one session."
 )
 
 
