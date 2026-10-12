@@ -40,7 +40,7 @@ Prompt 1 — Space to select, Enter:
 ? What would you like to load?
   [✓] A local CSV / Parquet / JSON file, or a folder of them
 ```
-Prompt 2 — paste the **full** path of the unzipped folder, Enter (`~` does not work here; drag the folder into the terminal to get the full path):
+Prompt 2 — paste the **full** path of the unzipped folder, Enter:
 ```
 ? Local CSV / Parquet / JSON file — or a folder of them (type back to return)
 ```
