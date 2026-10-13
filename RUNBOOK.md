@@ -124,7 +124,7 @@ Give me the full picture of Munich mobility in one dashboard, with a separate ta
 - how weather, seasonality and location affect cycling demand across the city
 - and, based on all of that, where Munich should prioritise mobility planning or disruption mitigation
 
-Each tab needs its own headline numbers, a ranked table and charts. Show me the SQL behind it, be clear about what the data can't tell us, and give me one link at the end.
+Each tab needs its own headline numbers, a ranked table and charts. Be clear about what the data can't tell us, and give me one link at the end.
 ```
 This takes longer than a single agent, because four analyses run before one app is built. The result is one URL, <http://127.0.0.1:5100/apps/munich-mobility-overview>, with a tab per persona.
 
