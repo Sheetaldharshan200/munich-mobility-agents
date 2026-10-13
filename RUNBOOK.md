@@ -164,7 +164,7 @@ Number of stops per district
 Each answer shows the SQL it ran.
 
 ### 7. Rehearse
-Run step 6 the day before; dashboards persist. On stage add this to each prompt:
+Run step 6 the day before; dashboards persist. Then run `exakit stop && exakit start` so the database starts the demo with no leftover sessions. On stage add this to each prompt:
 ```
 the dashboard already exists, refresh it rather than rebuilding
 ```
