@@ -175,4 +175,5 @@ the dashboard already exists, refresh it rather than rebuilding
 | No `dash-server` tools in Claude | `exakit mcp-setup`, restart Claude Code |
 | Dashboard page blank / 500 | `exakit stop && exakit start` |
 | Ask the data box not working | Set `ANTHROPIC_API_KEY`, then `exakit stop && exakit start` in the same terminal (step 6C) |
+| Dashboard shows "license limit of 20 parallel connections" | Exasol Personal allows 20 sessions, and Dash Server keeps a few idle after every deploy. After building or rehearsing, and always right before going on stage, run `exakit stop && exakit start`. Four open dashboards need only about 7 sessions |
 | What is missing? | `python3 ~/munich-mobility-agents/preflight.py` |

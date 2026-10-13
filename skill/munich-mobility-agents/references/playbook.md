@@ -30,6 +30,7 @@ Other AI clients find the same skills under `~/.agents/skills/`.
 - **Cycling infrastructure:** drop `path_type = 'Dummy'`. Segment midpoints are `mid_lat`, `mid_lon`.
 - **Bicycle counters:** 5 of the 6 counters have daily data (Jan to Jul 2026); Arnulf ends 2026-04-30; Margareten has none. The 15-minute table has `time_start` as text `HH:MM`.
 - **Distance:** haversine from the data-model file, with a bounding-box prefilter (`stop_lat BETWEEN lat - 0.0015 AND lat + 0.0015`) so the join stays fast. Do not restrict to the same district; it drops pairs across borders.
+- **Connection limit:** Exasol Personal allows 20 parallel sessions, and Dash Server keeps some idle after every deploy, so several agents deploying in one session can fill it. If a query, deploy or page load fails with "license limit of 20 parallel connections", wait a few seconds and retry once; do not redesign anything. `app_deploy_draft` with auto-rollback simply needs a second call.
 - **pyexasol placeholders** in the dashboard SQL: `{horizon!d}`, `{kind!s}`, `{w_density!f}`. Never `:name`. When you run such a file through the exasol MCP tool, substitute the sample values from `queries/sql_smoke.json` first.
 
 ## 3. The fast path: one pass, about 15 tool calls, about five minutes
