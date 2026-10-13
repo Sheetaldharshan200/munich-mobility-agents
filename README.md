@@ -30,6 +30,4 @@ Public Munich mobility data in Exasol Personal on a laptop. Four persona agents 
 | Population and boundaries, 25 districts | [opendata.muenchen.de](https://opendata.muenchen.de/dataset?q=stadtbezirke) | DISTRICTS |
 | Cycling infrastructure | [opendata.muenchen.de](https://opendata.muenchen.de/dataset?q=radwege) | CYCLING_INFRASTRUCTURE |
 
-Schema `MUNICH_DATASET`. Scheduled service only: no passengers, delays or live traffic. Nothing synthetic.
-
 Links: [Exasol Personal](https://www.exasol.com/personal/) · [Starter Kit](https://github.com/exasol-labs/exasol-personal-local-starterkit) · [dash-server](https://github.com/exasol-labs/dash-server) · [Exasol MCP server](https://github.com/exasol/mcp-server)
