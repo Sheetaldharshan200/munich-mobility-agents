@@ -118,14 +118,13 @@ Which district has the worst traffic right now?
 
 #### B. One prompt, one combined dashboard
 ```
-I want all four Munich mobility questions answered in one go and put on a single Dash Server dashboard called munich-mobility-overview, one tab per topic.
+Give me the full picture of Munich mobility in one dashboard, with a separate tab for each of these:
+- which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors
+- which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure
+- how weather, seasonality and location affect cycling demand across the city
+- and, based on all of that, where Munich should prioritise mobility planning or disruption mitigation
 
-Tab 1, mobility operations: which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors?
-Tab 2, urban planning: which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure?
-Tab 3, sustainability: how do weather, seasonality and location affect cycling demand across Munich?
-Tab 4, city leadership: based on what tabs 1 to 3 find, where should Munich prioritise mobility planning or disruption mitigation?
-
-Run the mobility-operations, urban-planning and sustainability agents in parallel first, then city-leadership on top of their results. Each tab should have its own KPI tiles, a ranked table and charts. Show me the SQL behind every tab, tell me what the data can't answer, and give me one URL at the end.
+Each tab needs its own headline numbers, a ranked table and charts. Show me the SQL behind it, be clear about what the data can't tell us, and give me one link at the end.
 ```
 This takes longer than a single agent, because four analyses run before one app is built. The result is one URL, <http://127.0.0.1:5100/apps/munich-mobility-overview>, with a tab per persona.
 

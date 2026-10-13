@@ -28,7 +28,7 @@ Read `references/dashboard-routing.md`. The short version:
 
 Each persona has its own skill with the full method and dashboard spec; the agent writes its SQL live from `references/sql-snippets.md` and builds the dashboard from the shared skeleton and look under the skill's `assets/`: `mobility-operations`, `urban-planning`, `sustainability`, `city-leadership` (installed next to this one, also the slash commands of the same name). If the subagent is not available, load that skill and follow it in this session.
 
-**All four questions in one prompt, one dashboard with four tabs** → run `mobility-operations`, `urban-planning` and `sustainability` in parallel, then `city-leadership`, and build ONE Dash Server app `munich-mobility-overview` with a tab per persona (each tab carries that agent's KPI tiles, ranked table and charts) plus the Ask-the-data box. Do not also deploy the four single-persona apps.
+**Several persona questions in one request, one dashboard with tabs or sections** (for example "the full picture of Munich mobility in one dashboard, a tab for each of these") → run `mobility-operations`, `urban-planning` and `sustainability` in parallel, then `city-leadership`, and build ONE Dash Server app `munich-mobility-overview` with a tab per persona (each tab carries that agent's KPI tiles, ranked table and charts) plus the Ask-the-data box. Do not also deploy the four single-persona apps.
 
 Delegate with the Agent tool (`subagent_type` = the name above) and pass the user's question verbatim. Relay the subagent's report: answer, ranked table, gaps, dashboard URL. If subagents are unavailable, load that persona's skill (same name) and follow its method yourself.
 
