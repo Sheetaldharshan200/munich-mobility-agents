@@ -77,7 +77,7 @@ or the Claude Desktop app → **Code** tab → new session.
 
 There are three ways to run the demo: **A** one dashboard per agent, **B** everything in one dashboard, **C** (optional) a free-form persona with the Ask the data box, switched on by an API key.
 
-Each agent follows its skill: it reads the shared playbook and SQL building blocks, designs its own queries for the question and runs them in front of you, interprets the results, builds the dashboard from the shared skeleton and look, deploys it on Dash Server, opens it to verify, and returns the URL. Expect about ten minutes per agent; the same prompt a second time refreshes the existing app and is faster.
+Each agent follows its skill: it reads the shared playbook and SQL building blocks, designs its own queries for the question and runs them in front of you, interprets the results, builds the dashboard from the shared skeleton and look, deploys it on Dash Server, opens it to verify, and returns the URL. Expect about four to five minutes per agent; the same prompt a second time refreshes the existing app and is faster.
 
 #### A. One prompt per agent, one dashboard each
 **Warm-up**
@@ -126,7 +126,7 @@ Give me the full picture of Munich mobility in one dashboard, with a separate ta
 
 Each tab needs its own headline numbers, a ranked table and charts. Be clear about what the data can't tell us, and give me one link at the end.
 ```
-This takes longer than a single agent, because four analyses run before one app is built. The result is one URL, <http://127.0.0.1:5100/apps/munich-mobility-overview>, with a tab per persona.
+This takes longer than a single agent (roughly 10 to 15 minutes), because four analyses run before one app is built. The result is one URL, <http://127.0.0.1:5100/apps/munich-mobility-overview>, with a tab per persona.
 
 #### C. Optional: a free-form persona with Ask the data (needs an Anthropic API key)
 The four persona dashboards above are fixed designs. Any other persona goes through the generic dashboard builder, and those dashboards carry an **Ask the data** box that turns a typed question into SQL, runs it read-only and shows the query. To use it:

@@ -15,7 +15,7 @@ Default question when none is given: "Which current or planned roadworks are clo
 ## Before anything else
 
 Read, in this order, from `~/.claude/skills/munich-mobility-agents/references/`:
-1. `playbook.md`: the data quirks, the Dash Server deploy recipe, orders of magnitude.
+1. `playbook.md`: the data quirks, the Dash Server deploy recipe, orders of magnitude, and the **one-pass budget in section 3**: about 15 tool calls and five minutes. Most of a run's time is the model writing text, so write each query and file once and keep the report short.
 2. `sql-snippets.md`: the weekday service set, line modes, the distance pattern. Assemble your queries from these; they are the part that costs an hour when written from scratch.
 
 If a `mobility-operations` subagent is available to the Agent tool, you may delegate to it with the question verbatim and relay its full report. If not, do the work yourself; this skill is complete on its own. The analysis is done live, in front of the audience: show every statement, run it, show the result.
@@ -28,12 +28,14 @@ If a `mobility-operations` subagent is available to the Agent tool, you may dele
 4. **Score per roadwork.** LN(1 + departures within 150 m) + cycle-path metres within 100 m ÷ 100 + 2 if `impact` names a closure or lane loss (Sperrung, Sperre, halbseitig, Fahrspur) + 1 if `affected_areas` includes Fahrbahn, scaled by LEAST(days inside the horizon, 28) ÷ 28. State the formula; it is a choice.
 5. **Deliver.** Top 25 zones (street, district, status, dates, impact, nearest stop and distance, departures affected, high-frequency lines, cycle metres, score), a per-district rollup, and the high-frequency lines with the most roadworks beside their stops.
 
-Three to five queries cover this: headline KPIs, the scored zones, the district rollup, the lines, and stops for the map. Parameterise the horizon and the roadwork kind with pyexasol placeholders so the dashboard controls reuse the same SQL.
+Final queries, three or four, each run once exactly as the dashboard uses it: `kpis` (one headline row), `zones` (the scored roadworks, ranked, with lat/lon), `districts` (the rollup), and `lines` if the question is about routes. Parameterise the horizon and the roadwork kind (`{horizon!d}`, `{kind!s}`) so the dashboard controls reuse the same SQL. Busy stops for the map context can come from the same `zones` chain, not a fifth query.
 
 ## Dashboard
 
 App `munich-mobility-ops`, built from `assets/app_skeleton.py` on `assets/munich_ui.py` (accent `ui.PERSONA["ops"]`):
 tiles (roadworks in horizon, within 150 m of a stop, departures at those stops, high-frequency lines touched, cycle-path metres affected); a map of roadworks coloured by score on the orange ramp with busy stops as grey context; disruption by district; the ranked worklist; the high-frequency lines bar by mode (`ui.MODES`); a 7/14/28-day horizon and a roadwork-type filter; a method-and-gaps panel. Deploy with the playbook recipe, open the URL, verify. If it already exists, put files and redeploy; never a second app.
+
+Helpers: `ui.kpi_tiles`, `ui.points_map` (orange ramp, busy stops as `context`), `ui.hbar` for districts, `ui.series_bar` with `ui.MODES` for lines, `ui.ranked_table` + `ui.table_data` for the worklist.
 
 ## What the data cannot answer
 
@@ -41,4 +43,4 @@ Passengers, delays, crowding and live traffic (GTFS is scheduled service). Actua
 
 ## Report format
 
-The answer in three to five sentences, the top-25 table, the SQL behind it, what the data cannot answer, the dashboard URL (`http://127.0.0.1:5100/apps/munich-mobility-ops`, or the host from `exakit status --json`). Write the same to `~/munich-demo-out/mobility-operations.md`. The dashboard is always on Dash Server, never an artifact, HTML page, image or inline chart.
+Keep it short; the full detail is on the dashboard. The answer in three to five sentences, the top-10 zones, the SQL of the main ranking query (name the other query files and the app workspace path instead of repeating them), what the data cannot answer in three to five bullets, and the dashboard URL (`http://127.0.0.1:5100/apps/munich-mobility-ops`). Write the same, in no more than about 60 lines, to `~/munich-demo-out/mobility-operations.md`. Dash Server only, never an artifact, HTML page, image or inline chart.

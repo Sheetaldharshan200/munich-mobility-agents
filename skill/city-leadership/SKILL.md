@@ -15,7 +15,7 @@ Default question when none is given: "Where should Munich prioritise mobility pl
 ## Before anything else
 
 Read, in this order, from `~/.claude/skills/munich-mobility-agents/references/`:
-1. `playbook.md`: the data quirks, the Dash Server deploy recipe, orders of magnitude.
+1. `playbook.md`: the data quirks, the Dash Server deploy recipe, orders of magnitude, and the **one-pass budget in section 3**: about 15 tool calls and five minutes. Most of a run's time is the model writing text, so write each query and file once and keep the report short.
 2. `sql-snippets.md`: the weekday service set, the distance pattern, the index and rank pattern.
 
 Then read the other agents' findings in `~/munich-demo-out/` (`mobility-operations.md`, `urban-planning.md`, `sustainability.md`) if they exist, to know what was found and how they scored things. Every number you cite is recomputed by your own SQL so the evidence traces to the database, not to another agent's prose. If a file is missing, compute that component yourself from that agent's method (its skill of the same name).
@@ -30,12 +30,14 @@ If a `city-leadership` subagent is available to the Agent tool, you may delegate
 4. **Corridors.** The top disruption zones (operations score) that fall inside the top-five priority districts.
 5. **Deliver.** The ranked districts (top five with the two or three numbers that put them there), the priority corridors, and a "what we do not know" list.
 
-Three to four queries cover this: the priority table, the corridors, headline KPIs, district centroids for the map. One long `WITH` chain that recomputes the operations and planning components is fine; it is the same CTEs the other agents used.
+Final queries, three, each run once exactly as the dashboard uses it: `priority` (the district evidence table, indices and weighted priority, with district centroids for the map), `corridors`, and `kpis`. One long `WITH` chain that recomputes the operations and planning components is fine; write it once and reuse the identical chain in all three files.
 
 ## Dashboard
 
 App `munich-leadership`, built from `assets/app_skeleton.py` on `assets/munich_ui.py` (accent `ui.PERSONA["leadership"]`):
 four weight sliders in a card with the normalised weights shown; tiles (districts flagged and their residents, residents in the top five, departures within 150 m of roadworks, cycle-path metres per 1,000 city-wide); a district map with markers numbered by rank and coloured on the violet ramp; a stacked bar of each index's weighted contribution for the top 12 districts (`ui.SLOTS[0..3]` in order); the ranking table with its evidence columns and the top five tinted; the corridor table; a "what we do not know" panel. Deploy with the playbook recipe, open the URL, move a slider to show the ranking recompute, verify. Refresh = put files and redeploy only.
+
+Helpers: `ui.kpi_tiles`, `ui.points_map` on the violet ramp, `ui.series_bar` horizontal and stacked for the weighted contributions, two `ui.ranked_table`s; sliders are plain `dcc.Slider`s feeding the query placeholders.
 
 ## What the data cannot answer
 
@@ -43,4 +45,4 @@ Scheduled service is not actual service. Five counters, so cycling demand is unk
 
 ## Report format
 
-The answer in three to five sentences, the ranked district table with the evidence columns, the corridor list, the SQL behind it, what the data cannot answer, the dashboard URL (`http://127.0.0.1:5100/apps/munich-leadership`). Write the same to `~/munich-demo-out/city-leadership.md`. Dash Server only, never an artifact or inline chart.
+Keep it short; the full detail is on the dashboard. The answer in three to five sentences, the top-10 districts with their evidence columns and the five main corridors, the SQL of the main ranking query (name the other query files and the app workspace path instead of repeating them), what the data cannot answer in three to five bullets, and the dashboard URL (`http://127.0.0.1:5100/apps/munich-leadership`). Write the same, in no more than about 60 lines, to `~/munich-demo-out/city-leadership.md`. Dash Server only, never an artifact, HTML page, image or inline chart.

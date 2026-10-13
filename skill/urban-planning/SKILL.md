@@ -15,7 +15,7 @@ Default question when none is given: "Which densely populated districts have low
 ## Before anything else
 
 Read, in this order, from `~/.claude/skills/munich-mobility-agents/references/`:
-1. `playbook.md`: the data quirks, the Dash Server deploy recipe, orders of magnitude.
+1. `playbook.md`: the data quirks, the Dash Server deploy recipe, orders of magnitude, and the **one-pass budget in section 3**: about 15 tool calls and five minutes. Most of a run's time is the model writing text, so write each query and file once and keep the report short.
 2. `sql-snippets.md`: the weekday service set, line modes, the 0 to 100 index and rank pattern.
 
 If an `urban-planning` subagent is available to the Agent tool, you may delegate to it with the question verbatim and relay its full report. If not, do the work yourself; this skill is complete on its own. The analysis is done live: show every statement, run it, show the result.
@@ -28,12 +28,14 @@ If an `urban-planning` subagent is available to the Agent tool, you may delegate
 4. **Gap.** Index each supply measure 0 to 100 across the 25 districts and rank them. Coverage gap = average supply rank minus density rank (positive = dense but under-served). Flag districts in the top third for density and the bottom third for either supply measure. State the thresholds; they are a choice.
 5. **Deliver.** The 25-row table sorted by gap, the flagged list with the raw numbers behind each flag, the mode split, and the count of stops excluded as outside Munich.
 
-Three to four queries cover this: the district table with indices and flags, headline KPIs, departures by mode per district, cycle-path type per district.
+Final queries, three or four, each run once exactly as the dashboard uses it: `ranking` (the 25 districts with indices, ranks, gap and flag), `kpis` (one headline row), `modes` (departures per district by line mode), and `paths` (cycle-path metres per district by path group) if the cycling side needs its own chart.
 
 ## Dashboard
 
 App `munich-urban-planning`, built from `assets/app_skeleton.py` on `assets/munich_ui.py` (accent `ui.PERSONA["planning"]`):
 tiles (residents per station, departures per 1,000, cycle-path metres per 1,000, districts flagged with their residents, stops outside Munich); a density-against-supply bubble chart (x departures per 1,000, y cycle metres per 1,000, size density, flagged districts in `ui.SLOTS[1]` orange with direct labels); departures per 1,000 by mode (`ui.MODES`, stacked); the ranked district table with flagged rows tinted; cycle-path type per district on an ordinal blue ramp (darker = more separated from traffic). No map is needed. Deploy with the playbook recipe, open the URL, verify. Refresh = put files and redeploy only.
+
+Helpers: `ui.kpi_tiles`, `ui.scatter` (flag column, orange for flagged), `ui.series_bar` with `ui.MODES` horizontal and stacked, `ui.series_bar` on an ordinal blue ramp for path types, `ui.ranked_table` + `ui.table_data`.
 
 ## What the data cannot answer
 
@@ -41,4 +43,4 @@ Ridership, crowding and delays (scheduled service only). Cycle traffic away from
 
 ## Report format
 
-The answer in three to five sentences, the 25-row table sorted by gap with the flagged rows called out, the SQL behind it, what the data cannot answer, the dashboard URL (`http://127.0.0.1:5100/apps/munich-urban-planning`). Write the same to `~/munich-demo-out/urban-planning.md`. Dash Server only, never an artifact or inline chart.
+Keep it short; the full detail is on the dashboard. The answer in three to five sentences, the top-10 districts by gap with the flagged ones called out, the SQL of the main ranking query (name the other query files and the app workspace path instead of repeating them), what the data cannot answer in three to five bullets, and the dashboard URL (`http://127.0.0.1:5100/apps/munich-urban-planning`). Write the same, in no more than about 60 lines, to `~/munich-demo-out/urban-planning.md`. Dash Server only, never an artifact, HTML page, image or inline chart.
