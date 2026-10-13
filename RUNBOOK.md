@@ -118,12 +118,14 @@ Which district has the worst traffic right now?
 
 #### B. One prompt, one combined dashboard
 ```
-Answer all four Munich mobility questions and publish the results as ONE Dash Server dashboard named munich-mobility-overview with four tabs.
-Tab 1 Mobility Operations: which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors?
-Tab 2 Urban Planning: which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure?
-Tab 3 Sustainability: how do weather, seasonality and location affect cycling demand across Munich?
-Tab 4 City Leadership: where should Munich prioritise mobility planning or disruption mitigation, based on the evidence in tabs 1 to 3?
-Run the mobility-operations, urban-planning and sustainability agents in parallel, then the city-leadership agent. Give every tab its own KPI tiles, ranked table and charts, show the SQL for each tab, say what the data cannot answer, and return one URL.
+I want all four Munich mobility questions answered in one go and put on a single Dash Server dashboard called munich-mobility-overview, one tab per topic.
+
+Tab 1, mobility operations: which current or planned roadworks are close to important public transport stops, high-frequency routes or busy cycling corridors?
+Tab 2, urban planning: which densely populated districts have lower scheduled public transport frequency or weaker cycling infrastructure?
+Tab 3, sustainability: how do weather, seasonality and location affect cycling demand across Munich?
+Tab 4, city leadership: based on what tabs 1 to 3 find, where should Munich prioritise mobility planning or disruption mitigation?
+
+Run the mobility-operations, urban-planning and sustainability agents in parallel first, then city-leadership on top of their results. Each tab should have its own KPI tiles, a ranked table and charts. Show me the SQL behind every tab, tell me what the data can't answer, and give me one URL at the end.
 ```
 This takes longer than a single agent, because four analyses run before one app is built. The result is one URL, <http://127.0.0.1:5100/apps/munich-mobility-overview>, with a tab per persona.
 
